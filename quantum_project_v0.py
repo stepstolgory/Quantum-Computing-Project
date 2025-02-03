@@ -1,9 +1,6 @@
 # First version of quantum computer simulation
-# TODO: Add qubit class
-# TODO: Add gates class
-# TODO: Add register class
-# TODO: Add simulation class
-
+# TODO: Change from applying gates to qubits, to applying gates to registers
+# TODO: Find a way to update qubits from the register matrix
 import numpy as np
 import scipy.linalg as spl
 import scipy.sparse as sps
@@ -114,22 +111,36 @@ class Simulation:
                 "The shape of the gates array must match the shape of the qubits_pos array!!!"
             )
         for i, qubit in enumerate(register.qubits[qubits_pos]):
-
-            # if gates[i].gate.shape[1] != qubit.amplitudes.shape[0]:
-            #     pad_width = abs(gates[i].gate.shape[1] - qubit.amplitudes.shape[0])
-            #     padded_amps = np.pad(
-            #         qubit.amplitudes, pad_width, mode="constant", constant_values=0
-            #     )
             qubit.qubit = np.dot(gates[i].gate, qubit.qubit)
 
-    def apply_CNOT(self, CNOT, control, var, full=True):
+        qubit_states = [qubit.qubit for qubit in register.qubits[qubits_pos]]
+        register.reg = reduce(self.tensor, qubit_states)
+        for reg in self.registers:
+            reg.update_reg()
+
+    def apply_CNOT(self, CNOT, control_qubit, var, full=True):
         # TODO: Finish the implementation of multi-qubit gates
-        mini_reg = self.tensor(control.qubit, var.qubit)
-        res = np.dot(CNOT.gate, mini_reg)
-        if full:
-            return res
-        else:
-            return res
+        dummy_qubit = Qubit(var.qubit.flatten())
+        dummy_register = Register(np.array([control_qubit, dummy_qubit]))
+
+        dummy_register.reg = np.dot(CNOT.gate, dummy_register.reg)
+
+        # Factor out the second qubit
+        zero_amp = np.sum(dummy_register.reg[0::2])
+        one_amp = np.sum(dummy_register.reg[1::2])
+
+        # var.qubit = np.array([[zero_amp], [one_amp]])
+        resulting_amps = np.array([[zero_amp], [one_amp]])
+
+        Register.reg_id -= 1
+
+        del dummy_register
+        del dummy_qubit
+        self.registers.pop()
+        for reg in self.registers:
+            reg.update_reg()
+
+        return resulting_amps
 
 
 class Qubit:
@@ -212,7 +223,7 @@ class Qubit:
             self._qubit /= mag
 
     def __str__(self):
-        return f"Qubit at position {self.pos} in register {self.reg} with representation of\n {self.amplitudes[0]}|0> + {self.amplitudes[1]}|1>"
+        return f"Qubit at position {self.pos} in register {self.reg} with representation of\n {self.qubit[0, 0]}|0> + {self.qubit[1, 0]}|1>"
 
 
 class Register(Simulation):
@@ -239,22 +250,22 @@ class Register(Simulation):
             self.qubits[i].reg = self.reg_id
             self.qubits[i].pos = i
 
+        qubit_states = [qubit.qubit for qubit in self.qubits]
+        self._reg = None if self.n_qubits == 0 else reduce(self.tensor, qubit_states)
+
         Simulation.registers.append(self)
 
     @property
     def reg(self):
-        """
-        Calculates the matrix for the entire register
+        return self._reg
 
-        Returns:
-            numpy.array: Column matrix of size 2^self.n_qubits
-        """
-        if self.n_qubits == 0:
-            return None
+    @reg.setter
+    def reg(self, value):
+        self._reg = value
 
+    def update_reg(self):
         qubit_states = [qubit.qubit for qubit in self.qubits]
-
-        return reduce(self.tensor, qubit_states)
+        self._reg = None if self.n_qubits == 0 else reduce(self.tensor, qubit_states)
 
     def add_qubit(self, qubit):
         """Appends a qubit to the register
@@ -268,6 +279,10 @@ class Register(Simulation):
         print("ADDING QUBITS ARE NOT FULLY IMPLEMENTED YET!!")
         self.qubits = np.append(self.qubits, qubit)
         self.n_qubits += 1
+        qubit.reg = self.reg_id
+        qubit.pos = self.n_qubits - 1
+        qubit_states = [qubit.qubit for qubit in self.qubits]
+        self._reg = None if self.n_qubits == 0 else reduce(self.tensor, qubit_states)
         return self.reg
 
     def remove_qubit(self, pos):
@@ -282,7 +297,12 @@ class Register(Simulation):
         print("REMOVING QUBITS ARE NOT FULLY IMPLEMENTED YET!!")
         self.qubits = np.delete(self.qubits, pos)
         self.n_qubits -= 1
+        qubit_states = [qubit.qubit for qubit in self.qubits]
+        self._reg = None if self.n_qubits == 0 else reduce(self.tensor, qubit_states)
         return self.reg
+
+    def partial_measure(self, pos):
+        pass
 
     def __str__(self):
         try:
@@ -348,7 +368,6 @@ if __name__ == "__main__":
     # T = Gate(data_t, row, main_diag_col, False)
     H = Gate(data_h, row_h, col_h, False)
     CNOT_2 = Gate(data_cnot2, row_cnot2, col_cnot2, False)
-    print(H.gate)
 
     zero = np.array([[1], [0]])
     one = np.array([[0], [1]])
@@ -362,15 +381,14 @@ if __name__ == "__main__":
 
     reg_x = Register(np.array([qubit0, qubit1]))
     reg_y = Register(np.array([qubit2]))
+    psi = Register(np.array([qubit0, qubit1, qubit2]))
 
     simulation.apply_gates(np.array([H, H]), np.array([0, 1]), reg_x)
     simulation.apply_gates(np.array([H]), np.array([0]), reg_y)
 
-    print(reg_x)
-    print(reg_y)
-
-    # Testing
-    psi = np.dot(reg_x.reg, reg_y.reg.T)
+    print(f"{reg_x}\n")
+    print(f"{reg_y}\n")
+    print(f"{psi}\n")
 
     f = np.array(
         [
@@ -381,8 +399,14 @@ if __name__ == "__main__":
         ]
     )
 
+    results = []
     for val in f:
-        print(simulation.apply_CNOT(CNOT_2, val, reg_y.qubits[0], full=False))
+        results.append(simulation.apply_CNOT(CNOT_2, val, reg_y.qubits[0], full=False))
+    psi.reg = (reg_x.reg * np.array(results).reshape(4, 2)).reshape(8, 1)
+    print(psi)
+    # simulation.apply_gates(np.array([H, H, H]), np.array([0, 1, 2]), psi)
+    HHH = simulation.power_tensor(H.gate, 2)
+    print(np.dot(HHH, psi.reg))
 
     # test_qubit1 = Qubit(np.array([1 / np.sqrt(2), 1 / np.sqrt(2)]))
     # test_qubit2 = Qubit(np.array([1, 0]))

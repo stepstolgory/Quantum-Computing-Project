@@ -98,12 +98,17 @@ class Simulation:
         return inter_mat
 
     def apply_gates(self, gates, register):
-        # Need to make sure that the number of gates matches the number of qubits in the register
-        # Gates should be an array of size n and contain the gate objects
-        # Qubits_pos should also be an array of the same size n which has the position of the qubit in the register on which the gate acts.
-        # so if you want to act on the second qubit with a hadamard gate. The gates array will be [H (object)], qubits_pos will have [1]
-        # Reg will be the register on which the gates are applied
-        # A tensor product needs to be done between all of the gates and it needs to slot in an I gate if no gate is specified for that position
+        """Applies n gates on a register with n qubits
+
+        Args:
+            gates (numpy.array, Gate): Either a numpy array of n instances of the Gate class or a single instance of the Gate class.
+            This is the gate(s) that are applied to the register. If it is an array then it must be of the same length as the number of qubits in the register.
+            register (Register): Register which the gates are applied to
+
+        Raises:
+            ValueError: Makes sure the number of gates matches the number of qubits in the register.
+            TypeError: Makes sure that the `gates` variable is of the correct type.
+        """
 
         if isinstance(gates, Gate):
 

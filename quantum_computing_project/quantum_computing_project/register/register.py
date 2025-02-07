@@ -38,7 +38,8 @@ class Register(Simulator):
         if self.n_qubits == 0:
             self._reg = None
         else:
-            self._reg = reduce(self.tensor, states)
+            # self._reg = reduce(self.tensor, states)
+            self._reg = reduce(self.sparse_tensor, states)
 
         Simulator.registers.append(self)
     
@@ -107,11 +108,13 @@ class Register(Simulator):
         Raises:
             TypeError: If the other object is not an instance of the Register class.
         """
-        zero = np.array([[1], [0]])
+        # zero = np.array([[1], [0]])
+        zero = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
         if isinstance(other, Register):
             new_n_bits = self.n_qubits + other.n_qubits
             newReg = Register(new_n_bits, [zero for _ in range(new_n_bits)])
-            newReg.reg = self.tensor(self.reg, other.reg)
+            # newReg.reg = self.tensor(self.reg, other.reg)
+            newReg.reg = self.sparse_tensor(self.reg, other.reg)
             return newReg
         else:
             raise TypeError("The objects added must be instances of the same class.")

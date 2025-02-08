@@ -78,7 +78,7 @@ class Simulator:
             numpy.array: 2D array which represents the final result of the operations.
         """
         inter_mat = A
-        # start_time = time.time()
+        # start_time = time.time()
         for _ in range(p - 1):
             inter_mat = self.tensor(A, inter_mat)
         # end_time = time.time()

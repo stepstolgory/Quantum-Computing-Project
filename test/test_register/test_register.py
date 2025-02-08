@@ -3,7 +3,7 @@ import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.register import Register
 
-class TestRegister():
+class TestRegister:
 
     # NON-SPARSE MATRICES TEST
     # @classmethod

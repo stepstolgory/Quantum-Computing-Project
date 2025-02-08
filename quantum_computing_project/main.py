@@ -1,6 +1,5 @@
-import scipy.sparse as sps
 import numpy as np
-from quantum_computing_project.register import Register
+from quantum_computing_project import Register
 
 def main():
     zero = np.array([[1], [0]])

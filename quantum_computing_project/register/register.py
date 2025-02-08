@@ -2,6 +2,7 @@ from functools import reduce
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.operations import Operations
+from quantum_computing_project.gate import Gate
 from quantum_computing_project import constants
 
 class Register:
@@ -41,6 +42,33 @@ class Register:
         else:
             # self._reg = reduce(self.tensor, states)
             self._reg = reduce(Operations.sparse_tensor, states)
+
+    def apply_gates(self, gates):
+        """
+        Applies n gates on a register with n qubits.
+
+        Args:
+            gates (numpy.array of Gate objects): The gates that are applied to the register. The array must
+                                                 be of the same length as the number of qubits in the register.
+
+        Raises:
+            ValueError: Makes sure the number of gates matches the number of qubits in the register.
+            TypeError: Makes sure that the `gates` variable is of the correct type.
+        """
+        if all(isinstance(g, Gate) for g in gates):
+
+            if gates.size != self.n_qubits:
+                 raise ValueError(
+                     "The number of gates must match the number of qubits in the register!!!"
+                 )
+
+            gates = np.array([g.gate for g in gates])
+            resulting_gate = reduce(Operations.sparse_tensor, gates)
+            self.reg = np.dot(resulting_gate, self.reg)
+        else:
+            raise TypeError(
+             "The 'gates' parameter must be a numpy.ndarray of Gate objects."
+         )
     
     @property
     def reg(self):

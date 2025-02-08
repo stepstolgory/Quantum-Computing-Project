@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.register import Register
-from quantum_computing_project import constants
+from quantum_computing_project.operations import Operations
+from quantum_computing_project.constants import *
 
 class TestRegister:
 
@@ -30,11 +31,40 @@ class TestRegister:
         
     #     np.testing.assert_array_equal(result_register._reg, expected_register._reg)
 
-    @classmethod
-    def setup_class(cls):
-        """Sets up (sparse) zero and one states so they can be used throughout the class."""
-        cls.zero = constants.ZERO
-        cls.one = constants.ONE
+    def test_apply_gates_single(self):
+        """
+        Test case for applying a single gate to a one-qubit register.
+
+        This test applies a single quantum gate (X) to a quantum register containing
+        the zero state (|0⟩). It checks that after the gate is applied, the register
+        is transformed into the one state (|1⟩).
+
+        Asserts:
+            - The register's state after applying the gate is |1⟩.
+        """
+        testReg = Register(1, [ZERO])
+        testGates = np.array([X])
+        testReg.apply_gates(testGates)
+        np.testing.assert_array_equal(testReg.reg.toarray(), ONE.toarray())
+
+    def test_apply_gates_multi(self):
+        """
+        Test case for applying multiple gates to a multi-qubit register.
+
+        This test applies two gates (I and X) to a quantum register containing
+        the states |0⟩ and |1⟩, respectively. It checks that the result of applying
+        the gates results in the expected transformed states.
+
+        Asserts:
+            - The register's state after applying the gates is the tensor product
+              of the |0⟩ and |0⟩ states.
+        """
+        testReg = Register(2, [ZERO, ONE])
+        testGates = np.array([I, X])
+        testReg.apply_gates(testGates)
+        expected_state = Operations.sparse_tensor(ZERO, ZERO).toarray()
+        np.testing.assert_array_equal(testReg.reg.toarray(), expected_state)
+
 
     def test_add(self):
         """
@@ -46,10 +76,10 @@ class TestRegister:
         Asserts:
             - The concatenated register's quantum state matches the expected quantum state.
         """
-        r1 = Register(n_qubits=2, states=[self.zero, self.zero])
-        r2 = Register(n_qubits=3, states=[self.zero, self.zero, self.zero])
+        r1 = Register(n_qubits=2, states=[ZERO, ZERO])
+        r2 = Register(n_qubits=3, states=[ZERO, ZERO, ZERO])
         result_register = r1 + r2
-        expected_register = Register(5, [self.zero, self.zero, self.zero, self.zero, self.zero])
+        expected_register = Register(5, [ZERO, ZERO, ZERO, ZERO, ZERO])
         
         np.testing.assert_array_equal(result_register._reg.toarray(), expected_register._reg.toarray())
 
@@ -62,7 +92,7 @@ class TestRegister:
         Asserts:
             - A TypeError is raised.
         """
-        r1 = Register(n_qubits=2, states=[self.zero, self.zero])
+        r1 = Register(n_qubits=2, states=[ZERO, ZERO])
 
         with pytest.raises(TypeError):
             r1 + "invalid_object"

@@ -1,4 +1,4 @@
 from .register import Register
-from .gate import Gate, I, X, Y, Z, S, T, H
+from .gate import Gate
 from .operations import Operations
 from .simulator import Simulator

@@ -1,30 +1,21 @@
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project import Operations
+from quantum_computing_project import Simulator
+from quantum_computing_project import Register
+from quantum_computing_project import I, X
 
 def main():
-    data_s = np.array([1, 1j])
-    row_s = np.array([0, 1])
-    col_s = np.array([0, 1])
-    s_sparse = sps.coo_matrix((data_s, (row_s, col_s)))
+    zero = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
 
-    result = Operations.sparse_power_tensor(s_sparse, 2)
-    expected_data = np.array([1, 1j, 1j, -1])
-    expected_row = np.array([0, 1, 2, 3])
-    expected_col = np.array([0, 1, 2, 3])
-    expected = sps.coo_matrix((expected_data, (expected_row, expected_col)))
-    #print(result)
-    #print(expected)
+    myGates = np.array([X(), I()])
+    myReg = Register(2, [zero, zero])
+    print('start: ', myReg.reg.toarray())
 
-    s_arr = np.array([[1, 0], [0, 1j]])
-    result_arr = Operations.power_tensor(s_arr, 2)
-    expected_arr = np.array([[1, 0, 0, 0],
-                                [0, 1j, 0, 0],
-                                [0, 0, 1j, 0],
-                                [0, 0, 0, -1]])
-    #print(result_arr)
-    #print(expected_arr)
-    print(expected_arr == result.toarray())
+    sim = Simulator([myReg])
+    sim.apply_gates(myGates, myReg)
+    print('end: ', myReg.reg.toarray())
+
 
 if __name__ == "__main__":
     main()

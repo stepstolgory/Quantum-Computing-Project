@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.operations import Operations
+from quantum_computing_project import constants
 
 class TestOperations:
     """
@@ -9,16 +10,8 @@ class TestOperations:
     @classmethod
     def setup_class(cls):
         """Sets up sparse and non-sparse matrices for testing."""
-        data_s = np.array([1, 1j])
-        row_s = np.array([0, 1])
-        col_s = np.array([0, 1])
-        cls.s_sparse = sps.coo_matrix((data_s, (row_s, col_s)))
-
-        data_t = np.array([1, 1 / np.sqrt(2) + 1j / np.sqrt(2)])
-        row_t = np.array([0, 1])
-        col_t = np.array([0, 1])
-        cls.t_sparse = sps.coo_matrix((data_t, (row_t, col_t)))
-
+        cls.s_sparse = constants.S
+        cls.t_sparse = constants.T
         cls.s_arr = np.array([[1, 0], [0, 1j]])
         cls.t_arr = np.array([[1, 0], [0, 1/np.sqrt(2)+1j/np.sqrt(2)]])
 

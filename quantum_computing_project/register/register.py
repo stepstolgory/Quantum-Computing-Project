@@ -2,6 +2,7 @@ from functools import reduce
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.operations import Operations
+from quantum_computing_project import constants
 
 class Register:
     """
@@ -28,7 +29,7 @@ class Register:
         Args:
             n_qubits (int): The number of qubits in the quantum register.
             states (list): A list of states that initialise the quantum register. 
-                           The states should be provided in the form of numpy arrays.
+                           The states should be provided in the form of coo_matrices.
         """
         self.reg_id = Register.reg_id
         Register.reg_id += 1
@@ -47,7 +48,7 @@ class Register:
         Gets the quantum state of the register.
 
         Returns:
-            numpy.ndarray: The state vector of the quantum register.
+            sps.coo_matrix: The state vector of the quantum register.
         """
         return self._reg
 
@@ -107,12 +108,12 @@ class Register:
             TypeError: If the other object is not an instance of the Register class.
         """
         # zero = np.array([[1], [0]])
-        zero = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
         if isinstance(other, Register):
             new_n_bits = self.n_qubits + other.n_qubits
-            newReg = Register(new_n_bits, [zero for _ in range(new_n_bits)])
+            # newReg = Register(new_n_bits, [zero for _ in range(new_n_bits)])
+            newReg = Register(new_n_bits, [constants.ZERO for _ in range(new_n_bits)])
             # newReg.reg = self.tensor(self.reg, other.reg)
-            newReg.reg = Simulator().sparse_tensor(self.reg, other.reg)
+            newReg.reg = Operations.sparse_tensor(self.reg, other.reg)
             return newReg
         else:
             raise TypeError("The objects added must be instances of the same class.")

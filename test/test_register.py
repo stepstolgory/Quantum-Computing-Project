@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.register import Register
+from quantum_computing_project import constants
 
 class TestRegister:
 
@@ -32,8 +33,8 @@ class TestRegister:
     @classmethod
     def setup_class(cls):
         """Sets up (sparse) zero and one states so they can be used throughout the class."""
-        cls.zero = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
-        cls.one = sps.coo_matrix(([1], ([1], [0])), shape=(2, 1))
+        cls.zero = constants.ZERO
+        cls.one = constants.ONE
 
     def test_add(self):
         """

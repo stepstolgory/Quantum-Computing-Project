@@ -5,13 +5,8 @@ from quantum_computing_project.register import Register
 from quantum_computing_project.constants import *
 
 def main():
-    myGates = np.array([I, X])
-    myReg = Register(2, [ZERO, ONE])
-    print('start: ', myReg.reg.toarray())
-
-    sim = Simulator([myReg])
-    sim.apply_gates(myGates, myReg)
-    print('end: ', myReg.reg.toarray())
+    myReg = Register(1, [ZERO])
+    print(myReg)
 
 
 if __name__ == "__main__":

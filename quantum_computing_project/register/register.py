@@ -94,34 +94,34 @@ class Register:
     @property
     def dirac_representation(self):
         """
-        Returns the Dirac representation of the quantum register as a string.
-
-        The representation expresses the quantum register's state as a linear combination of basis states,
-        with the corresponding complex coefficients rounded to 6 decimal places.
+        Returns the Dirac representation of the quantum register's state as a string.
 
         Returns:
             dr (str): The Dirac representation of the quantum register.
         """
-        dr = f"{np.around(self.reg[0, 0], decimals=6)}|0>"
+        dense_reg = self.reg.toarray()
+        dr = f"{np.around(dense_reg[0, 0], decimals=6)}|0⟩"
         for i in range(1, 2**self.n_qubits):
-            dr += f" + {np.around(self.reg[i, 0], decimals = 6)}|{i}>"
+            dr += f" + {np.around(dense_reg[i, 0], decimals = 6)}|{i}⟩"
         return dr
     
     def __str__(self):
         """
-        Returns a string representation of the quantum register, including its state.
-
-        If the quantum state is not initialised (i.e. no qubits), it returns a message indicating the 
-        register contains no qubits. Otherwise, it returns the Dirac representation of the quantum register.
+        Returns a string representation of the quantum register, including its state. If the
+        register has no qubits, a string saying so is returned.
 
         Returns:
-            str: A descriptive string representation of the quantum register.
+            str: The string representation of the quantum register.
         """
-        try:
-            self.dirac_representation
-            return f"Register {self.reg_id} contains {self.n_qubits} qubits with representation of\n {self.dirac_representation}"
-        except TypeError:
+        if self.reg_id is None:
             return f"Register {self.reg_id} contains no qubits!!!"
+        else:
+            return f"Register {self.reg_id} contains {self.n_qubits} qubits with representation of\n {self.dirac_representation}"
+        # try:
+        #     self.dirac_representation
+        #     return f"Register {self.reg_id} contains {self.n_qubits} qubits with representation of\n {self.dirac_representation}"
+        # except TypeError:
+        #     return f"Register {self.reg_id} contains no qubits!!!"
         
     def __add__(self, other):
         """

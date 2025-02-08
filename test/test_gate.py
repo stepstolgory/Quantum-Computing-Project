@@ -1,7 +1,7 @@
 import numpy as np
 from quantum_computing_project.gate import Gate, I, X, Y, Z, S, H, T
 
-class TestGate():
+class TestGate:
     """
     Test suite for the gate package, testing various cases for real and complex gates
     (both dense and sparse) to ensure correct functionality.

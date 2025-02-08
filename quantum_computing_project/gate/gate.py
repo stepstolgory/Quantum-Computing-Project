@@ -6,7 +6,7 @@ class Gate:
     A class that represents a quantum gate.
 
     Attributes:
-        gate (np.array): Matrix representing quantum gate.
+        gate (np.array or sps.coo_matrix): Matrix representing quantum gate.
         data (np.array): Array containing non-zero data values in the matrix.
         row (np.array): Array containing row indices where the non-zero values are placed.
         col (np.array): Array containing column indices where the non-zero values are placed.
@@ -26,7 +26,7 @@ class Gate:
         self.sparse = sparse
 
         if self.sparse:
-            self.gate = sps.coo_matrix((data, (row, col))).toarray()
+            self.gate = sps.coo_matrix((data, (row, col)))
         else:
             self.gate = np.zeros((row.max() + 1, col.max() + 1), dtype=np.complex128)
             for i in range(data.size):

@@ -16,7 +16,6 @@ class TestGate:
         Asserts:
             - The created gate is a 2x2 identity matrix.
         """
-        
         data = np.array([1, 1])
         row = np.array([0,1])
         col = np.array([0,1])
@@ -33,7 +32,6 @@ class TestGate:
         Asserts:
             - The created gate has complex values and matches the expected output.
         """
-
         data = np.array([1, 1j])
         row = np.array([0,1])
         col = np.array([0,1])
@@ -51,7 +49,6 @@ class TestGate:
         Asserts:
             - The created gate is a 2x2 identity matrix.
         """
-
         data = np.array([1, 1])
         row = np.array([0,1])
         col = np.array([0,1])
@@ -68,7 +65,6 @@ class TestGate:
         Asserts:
             - The created gate has complex values and matches the expected output.
         """
-
         data = np.array([1, 1j])
         row = np.array([0,1])
         col = np.array([0,1])

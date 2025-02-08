@@ -24,10 +24,13 @@ class Gate:
             sparse (bool): Signals whether the matrix should be implemented as sparse.
         """
         self.sparse = sparse
+        self.data = data
+        self.row = row
+        self.col = col
 
         if self.sparse:
-            self.gate = sps.coo_matrix((data, (row, col)))
+            self.gate = sps.coo_matrix((self.data, (self.row, self.col)))
         else:
-            self.gate = np.zeros((row.max() + 1, col.max() + 1), dtype=np.complex128)
+            self.gate = np.zeros((self.row.max() + 1, self.col.max() + 1), dtype=np.complex128)
             for i in range(data.size):
-                self.gate[row[i], col[i]] = data[i]
+                self.gate[self.row[i], self.col[i]] = self.data[i]

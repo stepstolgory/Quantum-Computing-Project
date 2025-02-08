@@ -37,7 +37,7 @@ class Operations:
             B (numpy.array): 2D array which represents the sparse matrix on the left of the tensor product.
 
         Returns:
-            np.array: 2D array which represents the sparse matrix resulting from the tensor product A(X)B.
+            coo_matrix: 2D array which represents the sparse matrix resulting from the tensor product A(X)B.
         """
         m, n = A.shape
         p, q = B.shape
@@ -92,11 +92,11 @@ class Operations:
             p (int): Number of sparse matrices between which the power tensor is performed (p-1 operations).
 
         Returns:
-            numpy.array: sparse 2D array which represents the final result of the operations.
+            coo_matrix: sparse 2D array which represents the final result of the operations.
         """
         inter_mat = A
         # start_time = time.time()
-        for _ in range(p):
+        for _ in range(p - 1):
             inter_mat = Operations.sparse_tensor(A, inter_mat)
         # end_time = time.time()
         # print(f"Time taken: {end_time-start_time}.")

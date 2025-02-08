@@ -15,6 +15,7 @@ class Register:
         _reg (numpy.ndarray): The state vector representing the quantum state of the register.
     
     Methods:
+        apply_gates: Applies n gates to a register with n qubits.
         reg (property): Getter for the quantum state of the register.
         reg (setter): Setter for the quantum state of the register.
         dirac_representation (property): Returns the Dirac representation of the quantum register.

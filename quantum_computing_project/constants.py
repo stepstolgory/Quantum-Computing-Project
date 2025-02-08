@@ -1,4 +1,4 @@
-from quantum_computing_project import Gate
+from quantum_computing_project.gate import Gate
 import numpy as np
 import scipy.sparse as sps
 """

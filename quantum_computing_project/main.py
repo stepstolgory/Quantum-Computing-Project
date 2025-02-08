@@ -1,19 +1,17 @@
 import numpy as np
 import scipy.sparse as sps
-from quantum_computing_project import Operations
-from quantum_computing_project import Simulator
-from quantum_computing_project import Register
-from quantum_computing_project import I, X
+from quantum_computing_project.operations import Operations
+from quantum_computing_project.simulator import Simulator
+from quantum_computing_project.register import Register
+from quantum_computing_project.constants import *
 
 def main():
-    zero = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
-
-    myGates = np.array([X(), I()])
-    myReg = Register(2, [zero, zero])
+    myGates = np.array([I, I])
+    myReg = Register(2, [ZERO, ZERO])
     print('start: ', myReg.reg.toarray())
 
     sim = Simulator([myReg])
-    sim.apply_gates(myGates, myReg)
+    sim.apply_gates(myGates, 1)
     print('end: ', myReg.reg.toarray())
 
 

@@ -55,7 +55,7 @@ class TestGate:
         sparse = True
         i = Gate(data, row, col, sparse).gate
         expected_i = np.array([[1, 0],[0, 1]])
-        np.testing.assert_array_equal(i, expected_i)
+        np.testing.assert_array_equal(i.toarray(), expected_i)
 
     def test_imaginary_sparse(self):
         """
@@ -71,6 +71,6 @@ class TestGate:
         sparse = True
         s = Gate(data, row, col, sparse).gate
         expected_s =  np.array([[1, 0],[0, 1j]])
-        np.testing.assert_array_equal(s, expected_s)
+        np.testing.assert_array_equal(s.toarray(), expected_s)
 
     

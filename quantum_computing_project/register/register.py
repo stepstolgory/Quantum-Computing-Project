@@ -65,11 +65,34 @@ class Register:
 
             gates = np.array([g.gate for g in gates])
             resulting_gate = reduce(Operations.sparse_tensor, gates)
-            self.reg = np.dot(resulting_gate, self.reg)
+            self.reg = (np.dot(resulting_gate, self.reg)).tocoo()
         else:
             raise TypeError(
              "The 'gates' parameter must be a numpy.ndarray of Gate objects."
          )
+
+    def apply_CNOT(self, control_qubit):
+        """Applies a CNOT gate to a register consisting of a single qubit
+
+        Args:
+            CNOT (Gate): An instance of the Gate class which represents the 2 qubit CNOT gate
+            control_qubit (numpy.array): State of the qubit that controls the gate. (zero or one)
+            register (Register): An instance of the Register class which represents a register with a single qubit that will be acted on by the CNOT gate
+
+        Returns:
+            numpy.array: The array of the separate amplitudes of the zero state and the one state of the second (original) qubit.
+        """
+        reg_with_control = Operations.sparse_tensor(control_qubit, self.reg)
+        final_reg = np.dot(constants.CNOT_2.gate, reg_with_control)
+
+        # Factor out the second qubit
+        zero_amp = np.sum(final_reg[0::2])
+        one_amp = np.sum(final_reg[1::2])
+
+        # var.qubit = np.array([[zero_amp], [one_amp]])
+        resulting_amps = np.array([[zero_amp], [one_amp]])
+
+        return resulting_amps
 
     def measure(self):
         """

@@ -22,6 +22,10 @@ H = Gate(np.array([1 / np.sqrt(2), 1 / np.sqrt(2), 1 / np.sqrt(2), -1 / np.sqrt(
 T = Gate(np.array([1, 1/np.sqrt(2)+1j/np.sqrt(2)]),
          np.array([0, 1]), np.array([0, 1]), True)
 
+CNOT_2 = Gate(np.array([1, 1, 1, 1]),
+            np.array([0, 1, 2, 3]), np.array([0, 1, 3, 2]), True)
+
+
 # States
 ZERO = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
 

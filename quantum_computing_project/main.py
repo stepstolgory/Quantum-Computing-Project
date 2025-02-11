@@ -17,5 +17,8 @@ def main():
         print(f'Result {i}: ', np.random.choice(sample, p=probabilities))
 
 
+
 if __name__ == "__main__":
     main()
+    test_f_balanced = [ZERO, ONE, ONE, ZERO, ONE, ZERO, ZERO, ONE]
+    print(f"The function is {'balanced' if Simulator.deutsch_josza(test_f_balanced, 3) else 'constant'}")

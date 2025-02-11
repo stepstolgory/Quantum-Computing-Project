@@ -10,8 +10,8 @@ class TestOperations:
     @classmethod
     def setup_class(cls):
         """Sets up sparse and non-sparse matrices for testing."""
-        cls.s_sparse = constants.S
-        cls.t_sparse = constants.T
+        cls.s_sparse = constants.S.gate
+        cls.t_sparse = constants.T.gate
         cls.s_arr = np.array([[1, 0], [0, 1j]])
         cls.t_arr = np.array([[1, 0], [0, 1/np.sqrt(2)+1j/np.sqrt(2)]])
 

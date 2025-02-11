@@ -70,6 +70,22 @@ class Register:
             raise TypeError(
              "The 'gates' parameter must be a numpy.ndarray of Gate objects."
          )
+
+    def measure(self):
+        """
+        Simulates a quantum measurement by collapsing the register's state.
+
+        The method squares the state vector elements to obtain probabilities,
+        then samples an index based on this distribution.
+
+        Returns:
+            int: The measured state index.
+        """
+        self.reg = self.reg.power(2)
+        sample = [i for i in range(self.reg.shape[0])]
+        probabilities = [p[0] for p in self.reg.toarray()]
+        return np.random.choice(sample, p=probabilities)
+
     
     @property
     def reg(self):

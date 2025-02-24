@@ -58,14 +58,14 @@ class Register:
         """
         if all(isinstance(g, Gate) for g in gates):
 
-            if gates.size != self.n_qubits:
-                 raise ValueError(
-                     "The number of gates must match the number of qubits in the register!!!"
-                 )
-
             gates = np.array([g.gate for g in gates])
             resulting_gate = reduce(Operations.sparse_tensor, gates)
-            self.reg = (np.dot(resulting_gate, self.reg)).tocoo()
+            if resulting_gate.shape[1] != self.reg.shape[0]:
+                raise ValueError(
+                    "The size of the gate must match the size of the register"
+                )
+            else:
+                self.reg = (np.dot(resulting_gate, self.reg)).tocoo()
         else:
             raise TypeError(
              "The 'gates' parameter must be a numpy.ndarray of Gate objects."
@@ -109,7 +109,21 @@ class Register:
         probabilities = [p[0] for p in self.reg.toarray()]
         return np.random.choice(sample, p=probabilities)
 
-    
+    def distribution(self):
+        """
+        Simulates a quantum measurement by collapsing the register's state.
+
+        The method squares the state vector elements to obtain probabilities,
+        then samples an index based on this distribution.
+
+        Returns:
+            int: The measured state index.
+        """
+        self.reg = self.reg.power(2)
+        sample = [i for i in range(self.reg.shape[0])]
+        probabilities = [p[0] for p in self.reg.toarray()]
+        return probabilities
+
     @property
     def reg(self):
         """

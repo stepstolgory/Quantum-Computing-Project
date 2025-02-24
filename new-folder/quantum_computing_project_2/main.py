@@ -2,7 +2,7 @@ import scipy.sparse as sps
 import sys
 sys.path.append("C:/Users/Sean/Desktop/QCP")
 from quantum_computing_project.operations import Operations
-#from quantum_computing_project.simulator import Simulator
+#from quantum_computing_project_2.simulator import Simulator
 from quantum_computing_project.register import Register
 from quantum_computing_project.constants import *
 from quantum_computing_project.grovers_functions import Simulator

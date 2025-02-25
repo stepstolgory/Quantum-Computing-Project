@@ -36,7 +36,7 @@ if __name__ == "__main__":
     #plt.ylabel("Probability")
     #plt.show()
 
-    search_variables = [16,13]
+    search_variables = [16]
     y = Simulator.grover_multiple_known_sols(input,search_variables)
     plt.bar(input,y, color = "red", edgecolor = "black")
     plt.xlabel("State")
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     ideal_t = np.floor(np.pi / (4 * theta))
     print(f"Ideal number of Grover iterations: {ideal_t}")
 
-    t_multiples = np.linspace(0.1, 3, 30)
+    t_multiples = np.linspace(0, 100, 100)
     print(t_multiples)
     probabilities = []
 

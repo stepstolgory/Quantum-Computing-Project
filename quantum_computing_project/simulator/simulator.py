@@ -5,6 +5,8 @@ from quantum_computing_project.register import Register
 from quantum_computing_project.gate import Gate
 from quantum_computing_project.operations import Operations
 from quantum_computing_project.constants import *
+import matplotlib.pyplot as plt
+import math
 
 class Simulator:
     """
@@ -25,7 +27,8 @@ class Simulator:
 
         N = len(func)
         n_inputs = int(np.log(N) / np.log(2))
-        k = (np.pi / 4) * np.sqrt(N)
+        k = math.floor((np.pi / 4) * np.sqrt(N))
+        # added floor above as its mathematically correct
         print("Initialising first step of Grover!!!")
         grover_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
         grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
@@ -67,16 +70,142 @@ class Simulator:
         # ***Can't just do 2|u⟩⟨u| - I for R0 since that is not reflective of quantum computing processes, must apply gates to achieve the same effect
 
         e = 0
-        while e <= k:
+        for _ in range(t):
             grover_state.apply_gates(np.array([flip_operator]))
             grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
             grover_state.apply_gates(np.array([R0]))
             grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
-            e += 1
 
-        # plt.plot(func, grover_state.distribution())
+
+        #plt.bar(func, grover_state.distribution())
+        #plt.xlabel("State")
+        #plt.ylabel("Probability")
+        #plt.show()
 
         return grover_state.distribution()
+
+
+    @staticmethod
+    def grover_multiple_known_sols(func, search_object):
+        """Inputs:
+            func : unordered list containing all possible solutions
+            search_object : list containing all known solutions"""
+        N = len(func)
+        n_sols = len(search_object)
+        theta = np.arcsin(np.sqrt(n_sols / N))
+        t = np.floor(np.pi / (4 * theta))
+        #theta and t as defined by Grover's for multiple sols
+        print(f"Ideal t within function: {t}")
+        n_inputs = int(np.log(N) / np.log(2))
+        initial_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
+        initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        desired_states = []
+        missing_values = []
+
+        for i in range(len(func)):
+            if func[i] in search_object:
+                desired_states.append(i)
+
+        # Check for values in search_object that are missing from func
+        missing_values = [val for val in search_object if val not in func]
+
+        if missing_values:
+            raise ValueError(f"The following desired values do not exist in the data: {missing_values}")
+
+        if not desired_states:
+            raise ValueError("The desired values do not exist in the data")
+
+        flip_data = np.ones(2 ** n_inputs)
+
+        for state in desired_states:
+            flip_data[state] = -1
+
+        flip_operator = Gate(flip_data, np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int), True)
+
+        R0_data = -np.ones(2 ** initial_state.n_qubits)
+        R0_data[0] = 1
+        R0 = Gate(R0_data,np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+                  np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+                  True)
+
+
+        for _ in range(int(t)):
+            initial_state.apply_gates(np.array([flip_operator]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+            initial_state.apply_gates(np.array([R0]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        #print(initial_state.distribution())
+        # Return the final probability distribution after Grover iterations
+        return initial_state.distribution()
+    @staticmethod
+
+    def grover_mod(func, search_object, t):
+        """
+        This is for plotting the probability of a solution against different values of t, interesting results
+        Inputs:
+            func : unordered list containing all possible solutions
+            search_object : list containing all known solutions
+            t : number of Grover iterations to apply"""
+
+        N = len(func)
+
+        n_inputs = int(np.log(N) / np.log(2))
+        initial_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
+
+
+        initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        desired_states = []
+        missing_values = []
+
+        # Find the indices of the desired solutions in the input list
+        for i in range(len(func)):
+            if func[i] in search_object:
+                desired_states.append(i)
+
+        # Check for values in search_object that are missing from func
+        missing_values = [val for val in search_object if val not in func]
+
+        if missing_values:
+            raise ValueError(f"The following desired values do not exist in the data: {missing_values}")
+
+        if not desired_states:
+            raise ValueError("The desired values do not exist in the data")
+
+        # Create the Grover Oracle (marked states have a phase flip of -1)
+        flip_data = np.ones(2 ** n_inputs)
+        for state in desired_states:
+            flip_data[state] = -1
+
+        flip_operator = Gate(
+            flip_data,
+            np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+            np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+            True,
+        )
+
+        # Create the reflection about the mean operator
+        R0_data = -np.ones(2 ** initial_state.n_qubits)
+        R0_data[0] = 1
+        R0 = Gate(
+            R0_data,
+            np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+            np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
+            True,
+        )
+
+        # Apply Grover iterations exactly `t` times
+        for _ in range(int(t)):
+            initial_state.apply_gates(np.array([flip_operator]))  # Oracle
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))  # Hadamard
+            initial_state.apply_gates(np.array([R0]))  # Reflection
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))  # Hadamard
+
+        #print(initial_state.distribution())
+        # Return the final probability distribution after Grover iterations
+        return initial_state.distribution()
 
     @staticmethod
     def deutsch_josza(func, n_inputs):

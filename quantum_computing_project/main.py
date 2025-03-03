@@ -36,12 +36,12 @@ if __name__ == "__main__":
     #plt.ylabel("Probability")
     #plt.show()
 
-    search_variables = [16]
-    y = Simulator.grover_multiple_known_sols(input,search_variables)
-    plt.bar(input,y, color = "red", edgecolor = "black")
-    plt.xlabel("State")
-    plt.ylabel("Probability")
-    plt.show()
+    search_variables = [8,10]
+    # y = Simulator.grover_multiple_known_sols(input,search_variables)
+    # plt.bar(input,y, color = "red", edgecolor = "black")
+    # plt.xlabel("State")
+    # plt.ylabel("Probability")
+    # plt.show()
 
     #this is for plotting probs of sol vs t
     N = len(input)
@@ -73,3 +73,24 @@ if __name__ == "__main__":
     plt.show()
 
 
+    new_input = [3,6,4,5,7,8,9,11,12,13,3,14,6,10]
+    search = [3,8]
+    sol_for_any_length = Simulator.grover_any_length(new_input, search)
+    print(sol_for_any_length)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # Left plot: States vs Probability
+    axes[0].bar(new_input, sol_for_any_length, color="red", edgecolor="black")
+    axes[0].set_xlabel("State")
+    axes[0].set_ylabel("Probability")
+    axes[0].set_title("State vs. Probability")
+
+    # Right plot: Index vs Probability
+    indices = list(range(len(new_input)))
+    axes[1].bar(indices, sol_for_any_length, color="blue", edgecolor="black")
+    axes[1].set_xlabel("Index")
+    axes[1].set_ylabel("Probability")
+    axes[1].set_title("Index vs. Probability")
+
+    plt.tight_layout()
+    plt.show()

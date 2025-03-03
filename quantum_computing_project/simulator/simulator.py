@@ -250,3 +250,176 @@ class Simulator:
         balanced = any("1" in state[:-1] for state in states)
 
         return balanced
+    @staticmethod
+
+    def grover_any_length(func, search_object):
+        """Inputs:
+            func : unordered list containing all possible solutions
+            search_object : list containing all known solutions
+        """
+        # Determine the original input length and compute the required number of qubits.
+        L = len(func)
+        n_inputs = int(np.ceil(np.log2(L)))
+        extended_length = 2 ** n_inputs
+
+        # If necessary, pad 'func' with dummy values (here None) so that the Hilbert space is 2^n_inputs.
+        if L < extended_length:
+            padded_func = func + [None] * (extended_length - L)
+        else:
+            padded_func = func
+
+        n_sols = len(set(search_object))
+        # Use the extended Hilbert space dimension for theta and t
+        theta = np.arcsin(np.sqrt(n_sols / extended_length))
+        t = np.floor(np.pi / (4 * theta))
+        print(f"Ideal t within function: {t}")
+
+        # Initialize the register in state |0...0⟩ and then apply Hadamard gates.
+        initial_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
+        initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        # Identify indices in the padded function that are in the search_object.
+        desired_states = []
+        for i in range(len(padded_func)):
+            if padded_func[i] in search_object:
+                desired_states.append(i)
+
+        # Check for desired values missing from the original function (not the padded version)
+        missing_values = [val for val in search_object if val not in func]
+        if missing_values:
+            raise ValueError(f"The following desired values do not exist in the data: {missing_values}")
+
+        if not desired_states:
+            raise ValueError("The desired values do not exist in the data")
+
+        # Create the flip operator (oracle).
+        flip_data = np.ones(extended_length)
+        for state in desired_states:
+            flip_data[state] = -1
+
+        indices = np.linspace(0, extended_length - 1, extended_length, dtype=int)
+        flip_operator = Gate(flip_data, indices, indices, True)
+
+        # Create the reflection about zero operator (R0)
+        R0_data = -np.ones(extended_length)
+        R0_data[0] = 1
+        R0 = Gate(R0_data, indices, indices, True)
+
+        # Perform Grover iterations.
+        for _ in range(int(t)):
+            initial_state.apply_gates(np.array([flip_operator]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+            initial_state.apply_gates(np.array([R0]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        # Get the full probability distribution from the extended Hilbert space.
+        full_distribution = initial_state.distribution()
+        # Truncate the distribution to only include the original input states.
+        final_distribution = full_distribution[:L]
+
+        # Optionally re-normalize to account for the truncation.
+        norm = np.sum(final_distribution)
+        if norm > 0:
+            final_distribution = final_distribution / norm
+
+        return final_distribution
+    @staticmethod
+    def grover_calculate(unordered_list, search_object, t):
+
+        L = len(unordered_list)
+        n_inputs = int(np.ceil(np.log2(L)))
+        extended_length = 2 ** n_inputs
+
+        # If necessary, pad list with dummy values (here None) so that the Hilbert space is 2^n_inputs.
+        if L < extended_length:
+            padded_func = unordered_list + [None] * (extended_length - L)
+        else:
+            padded_func = unordered_list
+
+        """Inputs:
+            func : unordered list containing all possible solutions
+            search_object : list containing all known solutions
+            t : number of Grover iterations to apply"""
+        # Initialize the register in state |0...0⟩ and then apply Hadamard gates.
+        initial_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
+        initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        # Identify indices in the padded function that are in the search_object.
+        desired_states = []
+        for i in range(len(padded_func)):
+            if padded_func[i] in search_object:
+                desired_states.append(i)
+
+        # Check for desired values missing from the original function (not the padded version)
+        missing_values = [val for val in search_object if val not in unordered_list]
+        if missing_values:
+            raise ValueError(f"The following desired values do not exist in the data: {missing_values}")
+
+        if not desired_states:
+            raise ValueError("The desired values do not exist in the data")
+
+        # Create the flip operator (oracle).
+        flip_data = np.ones(extended_length)
+        for state in desired_states:
+            flip_data[state] = -1
+
+        indices = np.linspace(0, extended_length - 1, extended_length, dtype=int)
+        flip_operator = Gate(flip_data, indices, indices, True)
+
+        # Create the reflection about zero operator (R0)
+        R0_data = -np.ones(extended_length)
+        R0_data[0] = 1
+        R0 = Gate(R0_data, indices, indices, True)
+
+        # Perform Grover iterations.
+        for _ in range(int(t)):
+            initial_state.apply_gates(np.array([flip_operator]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+            initial_state.apply_gates(np.array([R0]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        # Get the full probability distribution from the extended Hilbert space.
+        full_distribution = initial_state.distribution()
+        # Truncate the distribution to only include the original input states.
+        final_distribution = full_distribution[:L]
+
+        # Optionally re-normalize to account for the truncation.
+        norm = np.sum(final_distribution)
+        if norm > 0:
+            final_distribution = final_distribution / norm
+
+        return final_distribution
+
+    @staticmethod
+    def grover_initialise(unordered_list, search_vals, unique, known_n_sols):
+
+        """ Inputs:
+        unordered_list : list of unordered values to search
+        search_vals : list of values to search for
+         unique: boolean, if true, only unique values are searched for, if false, duplicate values are also searched for
+         known_n_sols: boolean, if true, the number of solutions is known, if false, the number of solutions is unknown"""
+        # Determine the original input length and compute the required number of qubits.
+
+        if unique:
+            unordered_list = set(unordered_list)
+
+        L = len(unordered_list)
+        n_inputs = int(np.ceil(np.log2(L)))
+        extended_length = 2 ** n_inputs
+        #
+        if known_n_sols:
+            n_sols = len(set(search_vals))
+            theta = np.arcsin(np.sqrt(n_sols / extended_length))
+            t = np.floor(np.pi / (4 * theta))
+            return grover_calculate(unordered_list, search_vals, t)
+
+        else:
+
+
+        #placing constraints on the ratio of solutions to inputs
+        # if n_sols/L > 0.2:
+        #     raise ValueError(f"There are too many solutions to search for, try again with fewer solutions")
+
+
+
+

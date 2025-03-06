@@ -65,7 +65,7 @@ class Simulator:
     @staticmethod
     def grover_calculate(unordered_list, search_object, t):
         """Inputs:
-        unordered list : list of unordered values to search that has already been filitred by grover_initialise
+        unordered list : list of unordered values to search that has already been filitered by grover_initialise
         search_object : list of values to search for
         t: predetermined number of Grover iterations to apply"""
 
@@ -135,8 +135,8 @@ class Simulator:
         """ Inputs:
         unordered_list : list of unordered values to search
         search_vals : list of values to search for
-         unique: boolean, if true, only unique values are searched for, if false, duplicate values are also searched for
-         known_n_sols: boolean, if true, the number of solutions is known, if false, the number of solutions is unknown"""
+        unique (not used): boolean, if true, only unique values are searched for, if false, duplicate values are also searched for
+        known_n_sols: boolean, if true, the number of solutions is known, if false, the number of solutions is unknown"""
         # Determine the original input length and compute the required number of qubits.
 
         search_vals = list(set(search_vals))
@@ -173,6 +173,13 @@ class Simulator:
                         return final_distribution, unordered_list
 
             T = np.ceil(T*1.2)
-            if T>= max_T:
+            if T >= max_T:
                 print("No solutions found")
                 return None
+
+
+    @staticmethod
+    def classical_search(input_list, targets):
+        ind = np.where(np.isin(input_list, targets))[0]
+        return ind
+

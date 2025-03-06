@@ -73,7 +73,7 @@ class Simulator:
         n_inputs = int(np.ceil(np.log2(L)))
         extended_length = 2 ** n_inputs
 
-        # If necessary, pad list with dummy values (here None) so that the Hilbert space is 2^n_inputs.
+        # If necessary, pad list with dummy values
         if L < extended_length:
             padded_func = unordered_list + [None] * (extended_length - L)
         else:
@@ -117,12 +117,11 @@ class Simulator:
             initial_state.apply_gates(np.array([R0]))
             initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
 
-        # Get the full probability distribution from the extended Hilbert space.
+        #Truncate to only include original states
         full_distribution = initial_state.distribution()
-        # Truncate the distribution to only include the original input states.
         final_distribution = full_distribution[:L]
 
-        # Optionally re-normalize to account for the truncation.
+        #Renormalise the truncated distribution
         norm = np.sum(final_distribution)
         if norm > 0:
             final_distribution = final_distribution / norm

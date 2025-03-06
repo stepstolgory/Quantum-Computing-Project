@@ -130,7 +130,7 @@ class Simulator:
         return final_distribution
 
     @staticmethod
-    def grover_initialise(unordered_list, search_vals, unique, known_n_sols):
+    def grover_initialise(unordered_list, search_vals, known_n_sols):
 
         """ Inputs:
         unordered_list : list of unordered values to search
@@ -139,8 +139,7 @@ class Simulator:
          known_n_sols: boolean, if true, the number of solutions is known, if false, the number of solutions is unknown"""
         # Determine the original input length and compute the required number of qubits.
 
-        if unique:
-            unordered_list = list(set(unordered_list))
+        search_vals = list(set(search_vals))
 
         L = len(unordered_list)
         n_inputs = int(np.ceil(np.log2(L)))

@@ -1,3 +1,5 @@
+from pickle import FALSE
+
 import scipy.sparse as sps
 from quantum_computing_project.operations import Operations
 from quantum_computing_project.simulator import Simulator
@@ -62,10 +64,10 @@ if __name__ == "__main__":
     #TODO make the code robust such that it can handle inputs that are not of length that is a power of 2
 
 
-    new_input = [3,6,4,5,7,8,9,11,12,13,14,8,10]
+    new_input = [3,6,4,5,7,8,9,11,12,13,14,8,12]
     search = [3,12,5]
 
-    sol_final, mod_input = Simulator.grover_initialise(new_input, search, True,False)
+    sol_final, mod_input = Simulator.grover_initialise(new_input, search, False,False)
     print(sol_final)
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 

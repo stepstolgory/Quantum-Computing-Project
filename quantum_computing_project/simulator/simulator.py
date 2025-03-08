@@ -8,6 +8,7 @@ from quantum_computing_project.constants import *
 import matplotlib.pyplot as plt
 import math
 import random
+from scipy.sparse import coo_matrix
 
 class Simulator:
     """
@@ -65,7 +66,7 @@ class Simulator:
     @staticmethod
     def grover_calculate(unordered_list, search_object, t):
         """Inputs:
-        unordered list : list of unordered values to search that has already been filitered by grover_initialise
+        unordered list : list of unordered values to search that has already been filtered by grover_initialise
         search_object : list of values to search for
         t: predetermined number of Grover iterations to apply"""
 
@@ -97,6 +98,8 @@ class Simulator:
         if not desired_states:
             raise ValueError("The desired values do not exist in the data")
 
+
+
         # Create the flip operator (oracle).
         flip_data = np.ones(extended_length)
         for state in desired_states:
@@ -117,6 +120,24 @@ class Simulator:
             initial_state.apply_gates(np.array([R0]))
             initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
 
+
+
+        # truncating the register to only include the original input states.
+        mask = initial_state.reg.row < L
+        new_data = initial_state.reg.data[mask]
+        new_row = initial_state.reg.row[mask]
+        new_col = initial_state.reg.col[mask]
+        initial_state.reg = coo_matrix((new_data, (new_row, new_col)), shape=(L, 1))
+
+        # Normalise the probabilities before getting a measurement and distribution
+        reg_sq = initial_state.reg.power(2)
+        norm = np.sqrt(reg_sq.sum())
+        initial_state.reg = initial_state.reg/norm
+
+        measurement = initial_state.measure()
+        final_distribution = initial_state.distribution()
+
+        """
         # Get the full probability distribution from the extended Hilbert space.
         full_distribution = initial_state.distribution()
         # Truncate the distribution to only include the original input states.
@@ -126,8 +147,8 @@ class Simulator:
         norm = np.sum(final_distribution)
         if norm > 0:
             final_distribution = final_distribution / norm
-
-        return final_distribution
+        """
+        return final_distribution, measurement
 
     @staticmethod
     def grover_initialise(unordered_list, search_vals, known_n_sols):
@@ -149,8 +170,8 @@ class Simulator:
             n_sols = len(set(search_vals))
             theta = np.arcsin(np.sqrt(n_sols / extended_length))
             t = np.floor(np.pi / (4 * theta))
-            return Simulator.grover_calculate(unordered_list, search_vals, t), unordered_list
-
+            # return Simulator.grover_calculate(unordered_list, search_vals, t)[0], unordered_list
+            return Simulator.grover_calculate(unordered_list, search_vals, t)
         else:
             found_solution = False
             T = 1
@@ -160,7 +181,7 @@ class Simulator:
                 random.shuffle(ts)
 
                 for t in ts:
-                    final_distribution = Simulator.grover_calculate(unordered_list, search_vals, t)
+                    final_distribution = Simulator.grover_calculate(unordered_list, search_vals, t)[0]
 
                     threshold = 0.1 * np.max(final_distribution)
                     measured_states = np.where(final_distribution > threshold)[0]
@@ -170,7 +191,8 @@ class Simulator:
 
                     # Print states matched and unmatched
                     if matched_states:
-                        return final_distribution, unordered_list
+                        # return final_distribution, unordered_list
+                        return final_distribution, Simulator.grover_calculate(unordered_list, search_vals, t)[1]
 
             T = np.ceil(T*1.2)
             if T >= max_T:

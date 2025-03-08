@@ -176,26 +176,18 @@ class Simulator:
             found_solution = False
             T = 1
             max_T = np.ceil(np.sqrt(extended_length))
-            while not found_solution:
-                ts = list(range(1,T+1))
-                random.shuffle(ts)
+            while not found_solution and T <= max_T:
+                t = np.random.randint(1,T+1)
+                final_distribution, measured_state = Simulator.grover_calculate(unordered_list, search_vals, t)
 
-                for t in ts:
-                    final_distribution = Simulator.grover_calculate(unordered_list, search_vals, t)[0]
+                # Print states matched and unmatched
+                if unordered_list[measured_state] in search_vals:
+                    # return final_distribution, unordered_list
+                    found_solution = True
+                    return Simulator.grover_calculate(unordered_list, search_vals, t)
 
-                    threshold = 0.1 * np.max(final_distribution)
-                    measured_states = np.where(final_distribution > threshold)[0]
-
-                    # Check if the measured states are in the search values
-                    matched_states = [state for state in measured_states if unordered_list[state] in search_vals]
-
-                    # Print states matched and unmatched
-                    if matched_states:
-                        # return final_distribution, unordered_list
-                        return final_distribution, Simulator.grover_calculate(unordered_list, search_vals, t)[1]
-
-            T = np.ceil(T*1.2)
-            if T >= max_T:
+                T = np.ceil(T*1.2)
+            if not found_solution:
                 print("No solutions found")
                 return None
 

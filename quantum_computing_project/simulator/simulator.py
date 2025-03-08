@@ -74,7 +74,7 @@ class Simulator:
             grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
             e += 1
 
-        # plt.plot(func, grover_state.distribution())
+        # plt.plots(func, grover_state.distribution())
 
         return grover_state.distribution()
 
@@ -89,7 +89,7 @@ class Simulator:
         Returns:
             bool: Return True if the function is balanced and False otherwise
         """
-        print("Initialising the Deutsch-Jozsa Algorithm!!!")
+        # print("Initialising the Deutsch-Jozsa Algorithm!!!")
 
         # Initialises the required registers
         reg_x = Register(n_inputs, [ZERO for _ in range(n_inputs)])

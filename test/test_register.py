@@ -7,7 +7,6 @@ from quantum_computing_project.constants import *
 
 class TestRegister:
 
-    # TODO: add tests to check correct errors raised by apply_gates
     def test_apply_gates_single(self):
         """
         Test case for applying a single gate to a one-qubit register.

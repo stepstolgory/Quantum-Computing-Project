@@ -8,7 +8,7 @@ from quantum_computing_project.constants import *
 
 class Simulator:
     """
-    The Simulator class is where Deutsch-Josza, Grover's etc. will be implemented.
+    The Simulator class is where Deutsch-Jozsa, Grover's etc. will be implemented.
     """
 
     def __init__(self, registers):
@@ -79,8 +79,8 @@ class Simulator:
         return grover_state.distribution()
 
     @staticmethod
-    def deutsch_josza(func, n_inputs):
-        """Performs the Deutsch-Josza Algorithm for a given function with n inputs.
+    def deutsch_jozsa(func, n_inputs):
+        """Performs the Deutsch-Jozsa Algorithm for a given function with n inputs.
 
         Args:
             func (np.array): An array of outputs of the given function in lexicographical order. The function must be either balanced or constant.
@@ -89,7 +89,7 @@ class Simulator:
         Returns:
             bool: Return True if the function is balanced and False otherwise
         """
-        print("Initialising the Deutsch-Josza Algorithm!!!")
+        print("Initialising the Deutsch-Jozsa Algorithm!!!")
 
         # Initialises the required registers
         reg_x = Register(n_inputs, [ZERO for _ in range(n_inputs)])

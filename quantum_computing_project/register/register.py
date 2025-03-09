@@ -72,7 +72,8 @@ class Register:
          )
 
     def apply_CNOT_dj(self, control_qubit):
-        """Applies a CNOT gate to a register consisting of a single qubit
+        """
+        Applies a CNOT gate to a register consisting of a single qubit
 
         Args:
             control_qubit (numpy.array): State of the qubit that controls the gate (zero or one).
@@ -93,6 +94,12 @@ class Register:
         return resulting_amps
 
     def apply_CNOT(self, control):
+        """Applies a CNOT gate to a register consisting of a single qubit. An X gate is applied
+        to the register's state if the control register's state is |1⟩.
+
+        Args:
+            control (Register): The control register.
+        """
         if (control.reg.toarray() == ONE.toarray()).all():
             self.apply_gates(np.array([X]))
 

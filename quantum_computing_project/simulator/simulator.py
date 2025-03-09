@@ -125,7 +125,8 @@ class Simulator:
     @staticmethod
     def nine_qubit_shor(error):
         # Prepare start state: A|0⟩+B|1⟩
-        psi = Register(1, [ZERO]).apply_gates(np.array([H]))
+        psi = (Register(1, [ZERO]))
+        psi.apply_gates(np.array([H]))
 
         # Outer encoding (phase flip)
         reg_1a = Register(1, [ZERO])
@@ -163,6 +164,35 @@ class Simulator:
             reg.apply_CNOT(reg_3b)
         reg_3a.apply_gates(np.array([H]))
         reg_3b.apply_gates(np.array([H]))
-        phase_result = [reg_3b.measure(), reg_3a.measure()]
+        phase_result = (int(reg_3b.measure()), int(reg_3a.measure()))
 
-        return phase_result
+        # Detecting bit flip
+        # Block 1
+        reg_4a = Register(1, [ZERO])
+        reg_4b = Register(1, [ZERO])
+        reg_4a.apply_CNOT(psi)
+        reg_4a.apply_CNOT(reg_2a)
+        reg_4b.apply_CNOT(reg_2a)
+        reg_4b.apply_CNOT(reg_2b)
+        block1_bit_result = (int(reg_4b.measure()), int(reg_4a.measure()))
+        # Block 2
+        reg_4c = Register(1, [ZERO])
+        reg_4d = Register(1, [ZERO])
+        reg_4c.apply_CNOT(reg_1a)
+        reg_4c.apply_CNOT(reg_2c)
+        reg_4d.apply_CNOT(reg_2c)
+        reg_4d.apply_CNOT(reg_2d)
+        block2_bit_result = (int(reg_4d.measure()), int(reg_4c.measure()))
+        # Block 3
+        reg_4e = Register(1, [ZERO])
+        reg_4f = Register(1, [ZERO])
+        reg_4e.apply_CNOT(reg_1b)
+        reg_4e.apply_CNOT(reg_2e)
+        reg_4f.apply_CNOT(reg_2e)
+        reg_4f.apply_CNOT(reg_2f)
+        block3_bit_result = (int(reg_4f.measure()), int(reg_4e.measure()))
+        print('Phase-flip error syndrome: ' + str(phase_result))
+        print('Block 1 bit-flip error syndrome: ' + str(block1_bit_result))
+        print('Block 2 bit-flip error syndrome: ' + str(block2_bit_result))
+        print('Block 3 bit-flip error syndrome: ' + str(block3_bit_result))
+        return [phase_result, block1_bit_result, block2_bit_result, block3_bit_result]

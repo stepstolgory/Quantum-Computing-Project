@@ -54,11 +54,7 @@ def dj_memory_performance(max_qubits):
 def main():
     # dj_time_performance(12)
     # dj_memory_performance(12)
-    # print(Simulator.nine_qubit_shor('blank'))
-    target = Register(1, [ZERO])
-    control = Register(1, [ONE])
-    target.apply_CNOT2(control)
-    print(target)
+    Simulator.nine_qubit_shor('blank')
 
 
 if __name__ == "__main__":

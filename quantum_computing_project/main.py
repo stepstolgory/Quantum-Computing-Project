@@ -54,7 +54,7 @@ def dj_memory_performance(max_qubits):
 def main():
     # dj_time_performance(12)
     # dj_memory_performance(12)
-    Simulator.nine_qubit_shor('blank')
+    Simulator.nine_qubit_shor(phase_flip=True, bit_flip=False)
 
 
 if __name__ == "__main__":

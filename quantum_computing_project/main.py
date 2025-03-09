@@ -20,11 +20,11 @@ def dj_performance(n_qubits):
           #+ "\n Qubits: " + str(n_qubits))
     return time_taken
 
-def dj_time_performance():
+def dj_time_performance(max_qubits):
     """DJ Performance: Num Qubits vs Time Taken"""
     x_qubits = np.array([])
     y_time = np.array([])
-    for i in range(1, 13):
+    for i in range(1, max_qubits+1):
         time_taken= dj_performance(i)
         x_qubits = np.append(x_qubits, i)
         y_time = np.append(y_time, time_taken)
@@ -33,11 +33,11 @@ def dj_time_performance():
     plt.ylabel("Time (seconds)")
     plt.show()
 
-def dj_memory_performance():
+def dj_memory_performance(max_qubits):
     """DJ Performance: Num Qubits vs Memory Required"""
     x_qubits = np.array([])
     y_peak = np.array([])
-    for i in range(1, 13):
+    for i in range(1, max_qubits+1):
         tracemalloc.start()
         dj_performance(i)
         current, peak = tracemalloc.get_traced_memory()
@@ -52,20 +52,13 @@ def dj_memory_performance():
     plt.show()
 
 def main():
-    # dj_time_performance()
-    dj_memory_performance()
-
-    # myReg = Register(2, [PLUS, ZERO])
-    # print(myReg)
-    # myReg.reg = myReg.reg.power(2)
-    #
-    # sample = [i for i in range(myReg.reg.shape[0])]
-    # probabilities = [p[0] for p in myReg.reg.toarray()]
-    # print(sample)
-    # print(probabilities)
-    # for i in range(10):
-    #     print(f'Result {i}: ', np.random.choice(sample, p=probabilities))
-
+    # dj_time_performance(12)
+    # dj_memory_performance(12)
+    # print(Simulator.nine_qubit_shor('blank'))
+    target = Register(1, [ZERO])
+    control = Register(1, [ONE])
+    target.apply_CNOT2(control)
+    print(target)
 
 
 if __name__ == "__main__":

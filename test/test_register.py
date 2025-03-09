@@ -11,17 +11,17 @@ class TestRegister:
         """
         Test case for applying a single gate to a one-qubit register.
 
-        This test applies a single quantum gate (X) to a quantum register containing
+        This test applies a single quantum gate (H) to a quantum register containing
         the zero state (|0⟩). It checks that after the gate is applied, the register
-        is transformed into the one state (|1⟩).
+        is transformed into the PLUS state (|+⟩).
 
         Asserts:
             - The register's state after applying the gate is |1⟩.
         """
         testReg = Register(1, [ZERO])
-        testGates = np.array([X])
+        testGates = np.array([H])
         testReg.apply_gates(testGates)
-        np.testing.assert_array_equal(testReg.reg.toarray(), ONE.toarray())
+        np.testing.assert_array_equal(testReg.reg.toarray(), PLUS.toarray())
 
     def test_apply_gates_multi(self):
         """
@@ -40,6 +40,22 @@ class TestRegister:
         testReg.apply_gates(testGates)
         expected_state = Operations.sparse_tensor(ZERO, ZERO).toarray()
         np.testing.assert_array_equal(testReg.reg.toarray(), expected_state)
+
+    def test_apply_CNOT(self):
+        """
+        Test case for applying a CNOT gate to a register consisting of a single qubit.
+
+        This test applies a CNOT gate to a register whose state vector is |0⟩ and
+        a control register whose state vector is |1⟩.
+
+        Asserts:
+            - The target register's state after applying the CNOT gate is |1⟩ (i.e. it's
+            the same as the control register's state).
+        """
+        control = Register(1, [ONE])
+        target = Register(1, [ZERO])
+        target.apply_CNOT(control)
+        np.testing.assert_array_equal(target.reg.toarray(), control.reg.toarray())
 
 
     def test_add(self):

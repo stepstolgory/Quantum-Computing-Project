@@ -102,7 +102,7 @@ class Simulator:
 
         # Performs an XOR equivalent between each output of the function and the y register
         for val in func:
-            results.append(reg_y.apply_CNOT(val))
+            results.append(reg_y.apply_CNOT_dj(val))
 
         # Multiplies each state of the x register by its corresponding result for f(x) XOR reg_y
         results = np.array(results)
@@ -121,3 +121,48 @@ class Simulator:
         balanced = any("1" in state[:-1] for state in states)
 
         return balanced
+
+    @staticmethod
+    def nine_qubit_shor(error):
+        # Prepare start state: A|0⟩+B|1⟩
+        psi = Register(1, [ZERO]).apply_gates(np.array([H]))
+
+        # Outer encoding (phase flip)
+        reg_1a = Register(1, [ZERO])
+        reg_1b = Register(1, [ZERO])
+        reg_1a.apply_CNOT(psi)
+        reg_1b.apply_CNOT(psi)
+        psi.apply_gates(np.array([H]))
+        reg_1a.apply_gates(np.array([H]))
+        reg_1b.apply_gates(np.array([H]))
+
+        # Inner encoding (bit flip)
+        reg_2a = Register(1, [ZERO])
+        reg_2b = Register(1, [ZERO])
+        reg_2a.apply_CNOT(psi)
+        reg_2b.apply_CNOT(psi)
+
+        reg_2c = Register(1, [ZERO])
+        reg_2d = Register(1, [ZERO])
+        reg_2c.apply_CNOT(reg_1a)
+        reg_2d.apply_CNOT(reg_1a)
+
+        reg_2e = Register(1, [ZERO])
+        reg_2f = Register(1, [ZERO])
+        reg_2e.apply_CNOT(reg_1b)
+        reg_2f.apply_CNOT(reg_1b)
+
+        # Detecting phase flip
+        reg_3a = Register(1, [PLUS])
+        reg_3b = Register(1, [PLUS])
+        la = [psi, reg_2a, reg_2b, reg_1a, reg_2c, reg_2d]
+        lb = [reg_1a, reg_2c, reg_2d, reg_1b, reg_2e, reg_2f]
+        for reg in la:
+            reg.apply_CNOT(reg_3a)
+        for reg in lb:
+            reg.apply_CNOT(reg_3b)
+        reg_3a.apply_gates(np.array([H]))
+        reg_3b.apply_gates(np.array([H]))
+        phase_result = [reg_3b.measure(), reg_3a.measure()]
+
+        return phase_result

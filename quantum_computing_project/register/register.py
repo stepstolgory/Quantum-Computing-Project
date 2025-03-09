@@ -3,7 +3,7 @@ import numpy as np
 import scipy.sparse as sps
 from quantum_computing_project.operations import Operations
 from quantum_computing_project.gate import Gate
-from quantum_computing_project import constants
+from quantum_computing_project.constants import *
 
 class Register:
     """
@@ -62,7 +62,7 @@ class Register:
             resulting_gate = reduce(Operations.sparse_tensor, gates)
             if resulting_gate.shape[1] != self.reg.shape[0]:
                 raise ValueError(
-                    "The size of the gate must match the size of the register"
+                    "The size of the gate must match the size of the register."
                 )
             else:
                 self.reg = (np.dot(resulting_gate, self.reg)).tocoo()
@@ -71,19 +71,17 @@ class Register:
              "The 'gates' parameter must be a numpy.ndarray of Gate objects."
          )
 
-    def apply_CNOT(self, control_qubit):
+    def apply_CNOT_dj(self, control_qubit):
         """Applies a CNOT gate to a register consisting of a single qubit
 
         Args:
-            CNOT (Gate): An instance of the Gate class which represents the 2 qubit CNOT gate
-            control_qubit (numpy.array): State of the qubit that controls the gate. (zero or one)
-            register (Register): An instance of the Register class which represents a register with a single qubit that will be acted on by the CNOT gate
+            control_qubit (numpy.array): State of the qubit that controls the gate (zero or one).
 
         Returns:
             numpy.array: The array of the separate amplitudes of the zero state and the one state of the second (original) qubit.
         """
         reg_with_control = Operations.sparse_tensor(control_qubit, self.reg)
-        final_reg = np.dot(constants.CNOT_2.gate, reg_with_control)
+        final_reg = np.dot(CNOT_2.gate, reg_with_control)
 
         # Factor out the second qubit
         zero_amp = np.sum(final_reg[0::2])
@@ -93,6 +91,10 @@ class Register:
         resulting_amps = np.array([[zero_amp], [one_amp]])
 
         return resulting_amps
+
+    def apply_CNOT(self, control):
+        if (control.reg.toarray() == ONE.toarray()).all():
+            self.apply_gates(np.array([X]))
 
     def measure(self):
         """

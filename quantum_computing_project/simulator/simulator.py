@@ -123,16 +123,13 @@ class Simulator:
         return balanced
 
     @staticmethod
-    def nine_qubit_shor(phase_flip, bit_flip, bit_blocks=None, flipped_bit=None):
+    def nine_qubit_shor(phase_flip, bit_flip):
         """
         The nine qubit Shor code.
 
         Args:
             - phase_flip (bool): If True, phase-flip error is applied.
             - bit_flip (bool): If True, bit-flip error is applied.
-            - bit_blocks (list): List of blocks (1, 2 or 3) where a bit-flip error should occur
-                                 (at most one bit-flip error per block).
-            - flipped_bit (list): Which bit should be flipped in each block (1, 2 or 3).
         """
         if (phase_flip == False) and (bit_flip == False):
             # Prepare start state: A|0⟩+B|1⟩
@@ -207,81 +204,151 @@ class Simulator:
             print('Block 2 bit-flip error syndrome: ' + str(block2_bit_result))
             print('Block 3 bit-flip error syndrome: ' + str(block3_bit_result))
 
+        elif (phase_flip == True) and (bit_flip == False):
+            # Prepare start state: A|0⟩+B|1⟩
+            psi = (Register(1, [ZERO]))
+            psi.apply_gates(np.array([H]))
+
+            # Outer encoding (phase flip)
+            reg_1a = Register(1, [ZERO])
+            reg_1b = Register(1, [ZERO])
+            reg_1a.apply_CNOT(psi)
+            reg_1b.apply_CNOT(psi)
+            psi.apply_gates(np.array([H]))
+            reg_1a.apply_gates(np.array([H]))
+            reg_1b.apply_gates(np.array([H]))
+            reg_1a.apply_gates(np.array([Z]))
+
+            # Inner encoding (bit flip)
+            reg_2a = Register(1, [ZERO])
+            reg_2b = Register(1, [ZERO])
+            reg_2a.apply_CNOT(psi)
+            reg_2b.apply_CNOT(psi)
+
+            reg_2c = Register(1, [ZERO])
+            reg_2d = Register(1, [ZERO])
+            reg_2c.apply_CNOT(reg_1a)
+            reg_2d.apply_CNOT(reg_1a)
+
+            reg_2e = Register(1, [ZERO])
+            reg_2f = Register(1, [ZERO])
+            reg_2e.apply_CNOT(reg_1b)
+            reg_2f.apply_CNOT(reg_1b)
+
+            # Detecting phase flip
+            reg_3a = Register(1, [PLUS])
+            reg_3b = Register(1, [PLUS])
+            la = [psi, reg_2a, reg_2b, reg_1a, reg_2c, reg_2d]
+            lb = [reg_1a, reg_2c, reg_2d, reg_1b, reg_2e, reg_2f]
+            for reg in la:
+                reg.apply_CNOT(reg_3a)
+            for reg in lb:
+                reg.apply_CNOT(reg_3b)
+            reg_3a.apply_gates(np.array([H]))
+            reg_3b.apply_gates(np.array([H]))
+            phase_result = (int(reg_3b.measure()), int(reg_3a.measure()))
+
+            # Detecting bit flip
+            # Block 1
+            reg_4a = Register(1, [ZERO])
+            reg_4b = Register(1, [ZERO])
+            reg_4a.apply_CNOT(psi)
+            reg_4a.apply_CNOT(reg_2a)
+            reg_4b.apply_CNOT(reg_2a)
+            reg_4b.apply_CNOT(reg_2b)
+            block1_bit_result = (int(reg_4b.measure()), int(reg_4a.measure()))
+            # Block 2
+            reg_4c = Register(1, [ZERO])
+            reg_4d = Register(1, [ZERO])
+            reg_4c.apply_CNOT(reg_1a)
+            reg_4c.apply_CNOT(reg_2c)
+            reg_4d.apply_CNOT(reg_2c)
+            reg_4d.apply_CNOT(reg_2d)
+            block2_bit_result = (int(reg_4d.measure()), int(reg_4c.measure()))
+            # Block 3
+            reg_4e = Register(1, [ZERO])
+            reg_4f = Register(1, [ZERO])
+            reg_4e.apply_CNOT(reg_1b)
+            reg_4e.apply_CNOT(reg_2e)
+            reg_4f.apply_CNOT(reg_2e)
+            reg_4f.apply_CNOT(reg_2f)
+            block3_bit_result = (int(reg_4f.measure()), int(reg_4e.measure()))
+            print('Phase-flip error syndrome: ' + str(phase_result))
+            print('Block 1 bit-flip error syndrome: ' + str(block1_bit_result))
+            print('Block 2 bit-flip error syndrome: ' + str(block2_bit_result))
+            print('Block 3 bit-flip error syndrome: ' + str(block3_bit_result))
+
         elif (phase_flip == False) and (bit_flip == True):
+            # Prepare start state: A|0⟩+B|1⟩
+            psi = (Register(1, [ZERO]))
+            psi.apply_gates(np.array([H]))
 
-            if (bit_blocks is None) and (flipped_bit is None):
-                # Prepare start state: A|0⟩+B|1⟩
-                psi = (Register(1, [ZERO]))
-                psi.apply_gates(np.array([H]))
+            # Outer encoding (phase flip)
+            reg_1a = Register(1, [ZERO])
+            reg_1b = Register(1, [ZERO])
+            reg_1a.apply_CNOT(psi)
+            reg_1b.apply_CNOT(psi)
+            psi.apply_gates(np.array([H]))
+            reg_1a.apply_gates(np.array([H]))
+            reg_1b.apply_gates(np.array([H]))
 
-                # Outer encoding (phase flip)
-                reg_1a = Register(1, [ZERO])
-                reg_1b = Register(1, [ZERO])
-                reg_1a.apply_CNOT(psi)
-                reg_1b.apply_CNOT(psi)
-                psi.apply_gates(np.array([H]))
-                reg_1a.apply_gates(np.array([H]))
-                reg_1b.apply_gates(np.array([H]))
+            # Inner encoding (bit flip)
+            reg_2a = Register(1, [ZERO])
+            reg_2b = Register(1, [ZERO])
+            reg_2a.apply_CNOT(psi)
+            reg_2b.apply_CNOT(psi)
 
-                # Inner encoding (bit flip)
-                reg_2a = Register(1, [ZERO])
-                reg_2b = Register(1, [ZERO])
-                reg_2a.apply_CNOT(psi)
-                reg_2b.apply_CNOT(psi)
+            reg_2c = Register(1, [ZERO])
+            reg_2d = Register(1, [ZERO])
+            reg_2c.apply_CNOT(reg_1a)
+            reg_2d.apply_CNOT(reg_1a)
+            # X ERROR OCCURS HERE
+            reg_2d.apply_gates(np.array([X]))
 
-                reg_2c = Register(1, [ZERO])
-                reg_2d = Register(1, [ZERO])
-                reg_2c.apply_CNOT(reg_1a)
-                reg_2d.apply_CNOT(reg_1a)
-                reg_2d.apply_gates(np.array([X]))
+            reg_2e = Register(1, [ZERO])
+            reg_2f = Register(1, [ZERO])
+            reg_2e.apply_CNOT(reg_1b)
+            reg_2f.apply_CNOT(reg_1b)
 
-                reg_2e = Register(1, [ZERO])
-                reg_2f = Register(1, [ZERO])
-                reg_2e.apply_CNOT(reg_1b)
-                reg_2f.apply_CNOT(reg_1b)
+            # Detecting phase flip
+            reg_3a = Register(1, [PLUS])
+            reg_3b = Register(1, [PLUS])
+            la = [psi, reg_2a, reg_2b, reg_1a, reg_2c, reg_2d]
+            lb = [reg_1a, reg_2c, reg_2d, reg_1b, reg_2e, reg_2f]
+            for reg in la:
+                reg.apply_CNOT(reg_3a)
+            for reg in lb:
+                reg.apply_CNOT(reg_3b)
+            reg_3a.apply_gates(np.array([H]))
+            reg_3b.apply_gates(np.array([H]))
+            phase_result = (int(reg_3b.measure()), int(reg_3a.measure()))
 
-                # Detecting phase flip
-                reg_3a = Register(1, [PLUS])
-                reg_3b = Register(1, [PLUS])
-                la = [psi, reg_2a, reg_2b, reg_1a, reg_2c, reg_2d]
-                lb = [reg_1a, reg_2c, reg_2d, reg_1b, reg_2e, reg_2f]
-                for reg in la:
-                    reg.apply_CNOT(reg_3a)
-                for reg in lb:
-                    reg.apply_CNOT(reg_3b)
-                reg_3a.apply_gates(np.array([H]))
-                reg_3b.apply_gates(np.array([H]))
-                phase_result = (int(reg_3b.measure()), int(reg_3a.measure()))
-
-                # Detecting bit flip
-                # Block 1
-                reg_4a = Register(1, [ZERO])
-                reg_4b = Register(1, [ZERO])
-                reg_4a.apply_CNOT(psi)
-                reg_4a.apply_CNOT(reg_2a)
-                reg_4b.apply_CNOT(reg_2a)
-                reg_4b.apply_CNOT(reg_2b)
-                block1_bit_result = (int(reg_4b.measure()), int(reg_4a.measure()))
-                # Block 2
-                reg_4c = Register(1, [ZERO])
-                reg_4d = Register(1, [ZERO])
-                reg_4c.apply_CNOT(reg_1a)
-                reg_4c.apply_CNOT(reg_2c)
-                reg_4d.apply_CNOT(reg_2c)
-                reg_4d.apply_CNOT(reg_2d)
-                block2_bit_result = (int(reg_4d.measure()), int(reg_4c.measure()))
-                # Block 3
-                reg_4e = Register(1, [ZERO])
-                reg_4f = Register(1, [ZERO])
-                reg_4e.apply_CNOT(reg_1b)
-                reg_4e.apply_CNOT(reg_2e)
-                reg_4f.apply_CNOT(reg_2e)
-                reg_4f.apply_CNOT(reg_2f)
-                block3_bit_result = (int(reg_4f.measure()), int(reg_4e.measure()))
-                print('Phase-flip error syndrome: ' + str(phase_result))
-                print('Block 1 bit-flip error syndrome: ' + str(block1_bit_result))
-                print('Block 2 bit-flip error syndrome: ' + str(block2_bit_result))
-                print('Block 3 bit-flip error syndrome: ' + str(block3_bit_result))
-
-            elif bit_blocks is None:
-                ...
+            # Detecting bit flip
+            # Block 1
+            reg_4a = Register(1, [ZERO])
+            reg_4b = Register(1, [ZERO])
+            reg_4a.apply_CNOT(psi)
+            reg_4a.apply_CNOT(reg_2a)
+            reg_4b.apply_CNOT(reg_2a)
+            reg_4b.apply_CNOT(reg_2b)
+            block1_bit_result = (int(reg_4b.measure()), int(reg_4a.measure()))
+            # Block 2
+            reg_4c = Register(1, [ZERO])
+            reg_4d = Register(1, [ZERO])
+            reg_4c.apply_CNOT(reg_1a)
+            reg_4c.apply_CNOT(reg_2c)
+            reg_4d.apply_CNOT(reg_2c)
+            reg_4d.apply_CNOT(reg_2d)
+            block2_bit_result = (int(reg_4d.measure()), int(reg_4c.measure()))
+            # Block 3
+            reg_4e = Register(1, [ZERO])
+            reg_4f = Register(1, [ZERO])
+            reg_4e.apply_CNOT(reg_1b)
+            reg_4e.apply_CNOT(reg_2e)
+            reg_4f.apply_CNOT(reg_2e)
+            reg_4f.apply_CNOT(reg_2f)
+            block3_bit_result = (int(reg_4f.measure()), int(reg_4e.measure()))
+            print('Phase-flip error syndrome: ' + str(phase_result))
+            print('Block 1 bit-flip error syndrome: ' + str(block1_bit_result))
+            print('Block 2 bit-flip error syndrome: ' + str(block2_bit_result))
+            print('Block 3 bit-flip error syndrome: ' + str(block3_bit_result))

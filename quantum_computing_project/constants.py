@@ -41,3 +41,6 @@ MINUS_I = sps.coo_matrix((np.array([1/np.sqrt(2), -1j/np.sqrt(2)]),
 
 PLUS_I = sps.coo_matrix((np.array([1/np.sqrt(2), 1j/np.sqrt(2)]),
                          (np.array([0, 1]), np.array([0, 0]))), shape=(2, 1))
+
+BELL_PHI_PLUS = sps.coo_matrix((np.array([1/np.sqrt(2), 1/np.sqrt(2)]),
+                                (np.array([0, 3]), np.array([0, 0]))), shape=(4, 1))

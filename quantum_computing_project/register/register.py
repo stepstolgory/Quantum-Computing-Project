@@ -65,7 +65,7 @@ class Register:
                     "The size of the gate must match the size of the register."
                 )
             else:
-                self.reg = (np.dot(resulting_gate, self.reg)).tocoo()
+                self.reg = np.round(np.dot(resulting_gate, self.reg), decimals=8).tocoo()
         else:
             raise TypeError(
              "The 'gates' parameter must be a numpy.ndarray of Gate objects."
@@ -97,7 +97,7 @@ class Register:
         """Applies a CNOT gate to a register consisting of a single qubit. An X gate is applied
         to the register's state if the control register's state is |1⟩.
 
-        Args:
+        Args:w
             control (Register): The control register.
         """
         if (control.reg.toarray() == ONE.toarray()).all():

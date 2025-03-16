@@ -54,19 +54,78 @@ def dj_memory_performance(max_qubits):
 def main():
     # dj_time_performance(12)
     # dj_memory_performance(12)
-    Simulator.nine_qubit_shor(phase_flip=True, bit_flip=True)
+
+    # ENCODING
+    # Set up registers
+    psi = Register(1, [PLUS])
+    reg_1a = Register(1, [ZERO])
+    reg_1b = Register(1, [ZERO])
+
+    # Apply gates
+    comb_1 = reg_1a.apply_CNOT_sup(psi, dim = 2)
+    comb_2 = reg_1b.apply_CNOT_sup(comb_1, dim = 3)
+    # print(comb_2.reg.toarray()) # -- correct so far!
+
+    # APPLY X ERROR
+    comb_2.apply_gates(np.array([I, I, X])) # -- flips last qubit
+
+    # DETECTING
+    # Set up registers
+    reg_2a = Register(1, [ZERO])
+    reg_2b = Register(1, [ZERO])
+    system = comb_2 + reg_2a + reg_2b
+
+    # State of comb_4 is now |00100> + |11000>
+    # Apply gates
+
+
+def t():
+    # |000> + |111>
+    a1 = Operations.sparse_tensor(ZERO, ZERO)
+    a2 = Operations.sparse_tensor(a1, ZERO)
+    a3 = Operations.sparse_tensor(ONE, ONE)
+    a4 = Operations.sparse_tensor(a3, ONE)
+    A = 1/np.sqrt(2)*(a2+a4)
+    A = A.tocoo()
+
+    # |100> + |011>
+    b1 = Operations.sparse_tensor(ONE, ZERO)
+    b2 = Operations.sparse_tensor(b1, ZERO)
+    b3 = Operations.sparse_tensor(ZERO, ONE)
+    b4 = Operations.sparse_tensor(b3, ONE)
+    B = 1 / np.sqrt(2) * (b2 + b4)
+    B = B.tocoo()
+
+    # |010> + |101>
+    c1 = Operations.sparse_tensor(ZERO, ONE)
+    c2 = Operations.sparse_tensor(c1, ZERO)
+    c3 = Operations.sparse_tensor(ONE, ZERO)
+    c4 = Operations.sparse_tensor(c3, ONE)
+    C = 1 / np.sqrt(2) * (c2 + c4)
+    C = C.tocoo()
+
+    # |001> + |110>
+    d1 = Operations.sparse_tensor(ZERO, ZERO)
+    d2 = Operations.sparse_tensor(d1, ONE)
+    d3 = Operations.sparse_tensor(ONE, ONE)
+    d4 = Operations.sparse_tensor(d3, ZERO)
+    D = 1 / np.sqrt(2) * (d2 + d4)
+    D = D.tocoo()
+
+    A_res = Operations.sparse_tensor(A, ZERO)
+    B_res = Operations.sparse_tensor(B, ZERO)
+    C_res = Operations.sparse_tensor(C, ZERO)
+    D_res = Operations.sparse_tensor(D, ZERO)
+
+    print(D)
+
 
 if __name__ == "__main__":
-    main()
-    # test_f_balanced = [ZERO, ONE, ONE, ZERO, ONE, ZERO, ZERO, ONE]
-    # print(f"The function is {'balanced' if Simulator.deutsch_jozsa(test_f_balanced, 3) else 'constant'}")
-    #
-    # input = [16, 12, 2, 3, 6, 13, 4, 5, 7, 9, 11, 8, 1, 10, 15, 14]
-    # ind = np.linspace(0, len(input) - 1, len(input))
-    # search_variable = 8
-    #
-    # print(Simulator.grover_simplified(input, search_variable))
-    # plt.bar(ind, Simulator.grover_simplified(input, search_variable), color='skyblue', edgecolor='black')
-    # plt.xlabel("State")
-    # plt.ylabel("Probability")
-    # plt.show()
+    # |01000>
+    x = Register(5, [ZERO, ONE, ZERO, ZERO, ZERO])
+    result = np.dot(CNOT_24.gate, x.reg)
+    print(result)
+
+    # |01010>
+    y = Register(5, [ZERO, ONE, ZERO, ONE, ZERO])
+    print(y.reg)

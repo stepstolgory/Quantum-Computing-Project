@@ -121,3 +121,10 @@ class Simulator:
         balanced = any("1" in state[:-1] for state in states)
 
         return balanced
+
+    @staticmethod
+    def nine_qubit_shor(bit_flip, phase_flip):
+        ...
+
+
+

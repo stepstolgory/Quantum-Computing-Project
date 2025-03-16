@@ -48,6 +48,30 @@ ls24 = ls24_1 + ls24_2 + ls24_3 + ls24_4
 CNOT_24 = Gate(np.array([1 for _ in range(32)]),
               np.array([i for i in range(32)]),
               np.array(ls24),True)
+
+ls25_1 = [i for i in range(8)]
+ls25_2 =[9, 8, 11, 10, 13, 12, 15, 14]
+ls25_3 = [i for i in range(16,24)]
+ls25_4 = [25, 24, 27, 26, 29, 28, 31, 30]
+ls25 = ls25_1 + ls25_2 + ls25_3 + ls25_4
+CNOT_25 = Gate(np.array([1 for _ in range(32)]),
+              np.array([i for i in range(32)]),
+              np.array(ls25),True)
+
+ls35_1 = [i for i in range(4)]
+ls35_2 = [5, 4, 7, 6]
+ls35_3 = [i for i in range(8,12)]
+ls35_4 = [13, 12, 15, 14]
+ls35_5 = [i for i in range(16,20)]
+ls35_6 = [21, 20, 23, 22]
+ls35_7 = [i for i in range(24, 28)]
+ls35_8 = [29, 28, 31, 30]
+ls35 = ls35_1 + ls35_2 + ls35_3 + ls35_4 + ls35_5 + ls35_6 +ls35_7 + ls35_8
+CNOT_35 = Gate(np.array([1 for _ in range(32)]),
+              np.array([i for i in range(32)]),
+              np.array(ls35),True)
+
+
 # States
 ZERO = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))
 

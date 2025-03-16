@@ -121,11 +121,11 @@ def t():
 
 
 if __name__ == "__main__":
-    # |01000>
-    x = Register(5, [ZERO, ONE, ZERO, ZERO, ZERO])
-    result = np.dot(CNOT_24.gate, x.reg)
+    # |00100>
+    x = Register(5, [ZERO, ZERO, ONE, ZERO, ZERO])
+    result = np.dot(CNOT_35.gate, x.reg)
     print(result)
 
-    # |01010>
-    y = Register(5, [ZERO, ONE, ZERO, ONE, ZERO])
+    # |00101>
+    y = Register(5, [ZERO, ZERO, ONE, ZERO, ONE])
     print(y.reg)

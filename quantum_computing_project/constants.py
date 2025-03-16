@@ -25,14 +25,21 @@ T = Gate(np.array([1, 1/np.sqrt(2)+1j/np.sqrt(2)]),
 CNOT_2 = Gate(np.array([1, 1, 1, 1]),
             np.array([0, 1, 2, 3]), np.array([0, 1, 3, 2]), True)
 
-ls3 = [i for i in range(6)]
-ls3.append(2**3-1)
-ls3.append(2**3-2)
-CNOT_3 = Gate(np.array([1 for _ in range(8)]),
+# Special CNOTs
+ls12_1 = [i for i in range(4)]
+ls12_2 = [6, 7, 4, 5]
+ls12 = ls12_1 + ls12_2
+CNOT_12 = Gate(np.array([1 for _ in range(8)]),
               np.array([i for i in range(8)]),
-              np.array(ls3),True)
+              np.array(ls12),True)
 
-# Special CNOTs for 9 qubit Shor code
+ls13_1 = [i for i in range(4)]
+ls13_2 = [5, 4, 7, 6]
+ls13 = ls13_1 + ls13_2
+CNOT_13 = Gate(np.array([1 for _ in range(8)]),
+              np.array([i for i in range(8)]),
+              np.array(ls13),True)
+
 ls14_1 = [i for i in range(16)]
 ls14_2 = [18, 19, 16, 17, 22, 23, 20, 21, 26, 27, 24, 25, 30,  31, 28, 29]
 ls14 = ls14_1 + ls14_2

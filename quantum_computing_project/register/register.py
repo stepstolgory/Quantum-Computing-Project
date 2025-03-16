@@ -93,29 +93,6 @@ class Register:
 
         return resulting_amps
 
-    def apply_CNOT_sup(self, control, dim):
-        """
-        Applies the two-qubit CNOT gate between the given control register and self (target).
-        Both registers can be in a superposition state. The composite state is built as
-        |control, target⟩, then the CNOT gate is applied. The method returns a new Register whose
-        number of qubits equals control.n_qubits + self.n_qubits and whose state is entangled. For
-        example, if control = |+⟩ and target = |0⟩, the result is the Bell state
-        (|0,0⟩ + |1,1⟩)/sqrt(2).
-        """
-        # Create the composite state |control, target⟩
-        composite_state = Operations.sparse_tensor(control.reg, self.reg)
-        # Apply the two-qubit CNOT gate
-        if dim == 2:
-            new_state = CNOT_2.gate.dot(composite_state).tocoo()
-        elif dim == 3:
-            new_state = CNOT_3.gate.dot(composite_state).tocoo()
-        # Create a new Register
-        dummy_states = [ZERO for _ in range(dim)]
-        new_register = Register(dim, dummy_states)
-        # Override the register's state with computed entangled state.
-        new_register.reg = new_state
-        return new_register
-
     def measure(self):
         """
         Simulates a quantum measurement by collapsing the register's state.

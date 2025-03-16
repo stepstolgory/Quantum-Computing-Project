@@ -54,41 +54,15 @@ def dj_memory_performance(max_qubits):
 def main():
     # dj_time_performance(12)
     # dj_memory_performance(12)
+    Simulator.error_correction(error_type='bit flip', num_qubit=0) # -- expect (0,0)
+    Simulator.error_correction(error_type='bit flip', num_qubit=1)  # -- expect (1,0)
+    Simulator.error_correction(error_type='bit flip', num_qubit=2)  # -- expect (1,1)
+    Simulator.error_correction(error_type='bit flip', num_qubit=3)  # -- expect (0,1)
 
-    # ENCODING
-    # Set up registers
-    psi = Register(1, [PLUS])
-    reg_1a = Register(1, [ZERO])
-    reg_1b = Register(1, [ZERO])
-
-    # Apply gates
-    comb_1 = reg_1a.apply_CNOT_sup(psi, dim = 2)
-    comb_2 = reg_1b.apply_CNOT_sup(comb_1, dim = 3)
-    comb_2.apply_gates(np.array([H, H, H]))
-
-    # APPLY X ERROR
-    comb_2.apply_gates(np.array([Z, I, I])) # -- flips last qubit
-
-    # DETECTING
-    # Set up registers
-    comb_2.apply_gates(np.array([H, H, H]))
-    reg_2a = Register(1, [ZERO])
-    reg_2b = Register(1, [ZERO])
-    system = comb_2 + reg_2a + reg_2b
-
-    # State of system is now |00100> + |11000>
-    # Apply gates
-    system.reg = np.dot(CNOT_14.gate, system.reg).tocoo()
-    system.reg = np.dot(CNOT_24.gate, system.reg).tocoo()
-    system.reg = np.dot(CNOT_25.gate, system.reg).tocoo()
-    system.reg = np.dot(CNOT_35.gate, system.reg).tocoo()
-
-    # State of system is now |00101> + |11001> -- correct so far!
-    # Measurement
-    b_syndrome = measure_register_n(system.reg, 4)
-    c_syndrome = measure_register_n(system.reg, 5)
-    result = (int(b_syndrome), int(c_syndrome))
-    print(result)
+    Simulator.error_correction(error_type='phase flip', num_qubit=0)  # -- expect (0,0)
+    Simulator.error_correction(error_type='phase flip', num_qubit=1)  # -- expect (1,0)
+    Simulator.error_correction(error_type='phase flip', num_qubit=2)  # -- expect (1,1)
+    Simulator.error_correction(error_type='phase flip', num_qubit=3)  # -- expect (0,1)
 
 def measure_register_n(state, n):
     """

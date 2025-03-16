@@ -123,8 +123,89 @@ class Simulator:
         return balanced
 
     @staticmethod
-    def nine_qubit_shor(bit_flip, phase_flip):
-        ...
+    def error_correction(error_type, num_qubit):
+        # Encoding
+        psi = Register(3, [PLUS, ZERO, ZERO])
+        psi.reg = np.dot(CNOT_12.gate, psi.reg).tocoo()
+        psi.reg = np.dot(CNOT_13.gate, psi.reg).tocoo()
+
+        # Applying errors
+        if error_type == 'phase flip':
+            # Apply Hadamard gate (encoding)
+            psi.apply_gates(np.array([H, H, H]))
+            # Apply Z error
+            if num_qubit == 0:
+                psi.apply_gates(np.array([I, I, I])) # (0,0) -- no error
+            elif num_qubit == 1:
+                psi.apply_gates(np.array([Z, I, I])) # (1,0) -- phase flip on 1st qubit
+            elif num_qubit == 2:
+                psi.apply_gates(np.array([I, Z, I])) # (1,1) -- phase flip on 2nd qubit
+            elif num_qubit == 3:
+                psi.apply_gates(np.array([I, I, Z])) # (0,1) -- phase flip on 3rd qubit
+            else:
+                raise ValueError("You can apply a phase flip to one of 3 qubits (1, 2 or 3) or to none (0).")
+            # Apply Hadamard (decoding start)
+            psi.apply_gates(np.array([H, H, H]))
+
+        elif error_type == 'bit flip':
+            # Applying X error
+            if num_qubit == 0:
+                psi.apply_gates(np.array([I, I, I])) # (0,0) -- no error
+            elif num_qubit == 1:
+                psi.apply_gates(np.array([X, I, I])) # (1,0) -- 1st qubit flipped
+            elif num_qubit == 2:
+                psi.apply_gates(np.array([I, X, I])) # (1,1) -- 2nd qubit flipped
+            elif num_qubit == 3:
+                psi.apply_gates(np.array([I, I, X])) # (0,1) -- 3rd qubit flipped
+            else:
+                raise ValueError("You can only flip one of 3 qubits (1, 2 or 3) or choose to flip none (0).")
+        else:
+            raise ValueError("The error type must be 'phase flip' or 'bit flip'.")
+
+        # Detecting error
+        reg_x = Register (2, [ZERO, ZERO])
+        psi = psi + reg_x
+        psi.reg = np.dot(CNOT_14.gate, psi.reg).tocoo()
+        psi.reg = np.dot(CNOT_24.gate, psi.reg).tocoo()
+        psi.reg = np.dot(CNOT_25.gate, psi.reg).tocoo()
+        psi.reg = np.dot(CNOT_35.gate, psi.reg).tocoo()
+
+        # Measure the syndrome
+        b_syndrome = Simulator.measure_register_n(psi.reg, 4)
+        c_syndrome = Simulator.measure_register_n(psi.reg, 5)
+        result = (int(b_syndrome), int(c_syndrome))
+        print('Syndrome found: ' + str(result))
+        return result
+
+    @staticmethod
+    def measure_register_n(state, n):
+        """
+        Measures the n-th qubit in a 5-qubit state.
+
+        The function computes the total probability for the fourth qubit being 0 or 1.
+        It then returns the measurement outcome (0 or 1).
+        """
+        prob_0 = 0.0
+        prob_1 = 0.0
+
+        # Iterate over the nonzero elements in the state vector
+        for idx, amp in zip(state.row, state.data):
+            # Convert the index to a 5-bit binary string
+            bits = format(idx, '05b')
+            # The n-th qubit is at position n-1
+            if bits[n - 1] == '0':
+                prob_0 += np.abs(amp) ** 2
+            else:
+                prob_1 += np.abs(amp) ** 2
+
+        # Normalise probabilities
+        total = prob_0 + prob_1
+        if total > 0:
+            prob_0 /= total
+            prob_1 /= total
+
+        outcome = np.random.choice([0, 1], p=[prob_0, prob_1])
+        return outcome
 
 
 

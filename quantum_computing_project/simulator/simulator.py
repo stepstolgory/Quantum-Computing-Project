@@ -124,6 +124,24 @@ class Simulator:
 
     @staticmethod
     def error_correction(error_type, num_qubit):
+        """
+        Simulates quantum error correction for a 3-qubit system using bit-flip or phase-flip error models.
+
+        This method encodes a quantum state, applies a specified type of error (bit-flip or phase-flip)
+        to a selected qubit, and then detects the error using syndrome measurement.
+
+        Args:
+            error_type (str): The type of error to introduce. Must be either 'bit flip' or 'phase flip'.
+            num_qubit (int): The qubit index (1, 2, or 3) on which the error is applied.
+                             Use 0 for no error.
+
+        Returns:
+            tuple: A syndrome measurement result as a tuple (b_syndrome, c_syndrome), indicating
+                   the detected error syndrome.
+
+        Raises:
+            ValueError: If an invalid `error_type` is provided or if `num_qubit` is not in {0, 1, 2, 3}.
+        """
         # Encoding
         psi = Register(3, [PLUS, ZERO, ZERO])
         psi.reg = np.dot(CNOT_12.gate, psi.reg).tocoo()
@@ -180,7 +198,7 @@ class Simulator:
     @staticmethod
     def measure_register_n(state, n):
         """
-        Measures the n-th qubit in a 5-qubit state.
+        Helper method for error_correction. Measures the n-th qubit in a 5-qubit state.
 
         The function computes the total probability for the fourth qubit being 0 or 1.
         It then returns the measurement outcome (0 or 1).

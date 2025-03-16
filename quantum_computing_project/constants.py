@@ -71,6 +71,11 @@ CNOT_35 = Gate(np.array([1 for _ in range(32)]),
               np.array([i for i in range(32)]),
               np.array(ls35),True)
 
+# Projection operators
+
+P0 = Gate(np.array([1, 0]), np.array([0, 1]), np.array([0, 1]),True)
+
+P1 = Gate(np.array([0, 1]), np.array([0, 1]), np.array([0, 1]),True)
 
 # States
 ZERO = sps.coo_matrix(([1], ([0], [0])), shape=(2, 1))

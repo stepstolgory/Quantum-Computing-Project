@@ -64,68 +64,61 @@ def main():
     # Apply gates
     comb_1 = reg_1a.apply_CNOT_sup(psi, dim = 2)
     comb_2 = reg_1b.apply_CNOT_sup(comb_1, dim = 3)
-    # print(comb_2.reg.toarray()) # -- correct so far!
+    comb_2.apply_gates(np.array([H, H, H]))
 
     # APPLY X ERROR
-    comb_2.apply_gates(np.array([I, I, X])) # -- flips last qubit
+    comb_2.apply_gates(np.array([Z, I, I])) # -- flips last qubit
 
     # DETECTING
     # Set up registers
+    comb_2.apply_gates(np.array([H, H, H]))
     reg_2a = Register(1, [ZERO])
     reg_2b = Register(1, [ZERO])
     system = comb_2 + reg_2a + reg_2b
 
-    # State of comb_4 is now |00100> + |11000>
+    # State of system is now |00100> + |11000>
     # Apply gates
+    system.reg = np.dot(CNOT_14.gate, system.reg).tocoo()
+    system.reg = np.dot(CNOT_24.gate, system.reg).tocoo()
+    system.reg = np.dot(CNOT_25.gate, system.reg).tocoo()
+    system.reg = np.dot(CNOT_35.gate, system.reg).tocoo()
 
-
-def t():
-    # |000> + |111>
-    a1 = Operations.sparse_tensor(ZERO, ZERO)
-    a2 = Operations.sparse_tensor(a1, ZERO)
-    a3 = Operations.sparse_tensor(ONE, ONE)
-    a4 = Operations.sparse_tensor(a3, ONE)
-    A = 1/np.sqrt(2)*(a2+a4)
-    A = A.tocoo()
-
-    # |100> + |011>
-    b1 = Operations.sparse_tensor(ONE, ZERO)
-    b2 = Operations.sparse_tensor(b1, ZERO)
-    b3 = Operations.sparse_tensor(ZERO, ONE)
-    b4 = Operations.sparse_tensor(b3, ONE)
-    B = 1 / np.sqrt(2) * (b2 + b4)
-    B = B.tocoo()
-
-    # |010> + |101>
-    c1 = Operations.sparse_tensor(ZERO, ONE)
-    c2 = Operations.sparse_tensor(c1, ZERO)
-    c3 = Operations.sparse_tensor(ONE, ZERO)
-    c4 = Operations.sparse_tensor(c3, ONE)
-    C = 1 / np.sqrt(2) * (c2 + c4)
-    C = C.tocoo()
-
-    # |001> + |110>
-    d1 = Operations.sparse_tensor(ZERO, ZERO)
-    d2 = Operations.sparse_tensor(d1, ONE)
-    d3 = Operations.sparse_tensor(ONE, ONE)
-    d4 = Operations.sparse_tensor(d3, ZERO)
-    D = 1 / np.sqrt(2) * (d2 + d4)
-    D = D.tocoo()
-
-    A_res = Operations.sparse_tensor(A, ZERO)
-    B_res = Operations.sparse_tensor(B, ZERO)
-    C_res = Operations.sparse_tensor(C, ZERO)
-    D_res = Operations.sparse_tensor(D, ZERO)
-
-    print(D)
-
-
-if __name__ == "__main__":
-    # |00100>
-    x = Register(5, [ZERO, ZERO, ONE, ZERO, ZERO])
-    result = np.dot(CNOT_35.gate, x.reg)
+    # State of system is now |00101> + |11001> -- correct so far!
+    # Measurement
+    b_syndrome = measure_register_n(system.reg, 4)
+    c_syndrome = measure_register_n(system.reg, 5)
+    result = (int(b_syndrome), int(c_syndrome))
     print(result)
 
-    # |00101>
-    y = Register(5, [ZERO, ZERO, ONE, ZERO, ONE])
-    print(y.reg)
+def measure_register_n(state, n):
+    """
+    Measures the n-th qubit in a 5-qubit state.
+
+    The function computes the total probability for the fourth qubit being 0 or 1.
+    It then returns the measurement outcome (0 or 1).
+    """
+    prob_0 = 0.0
+    prob_1 = 0.0
+
+    # Iterate over the nonzero elements in the state vector
+    for idx, amp in zip(state.row, state.data):
+        # Convert the index to a 5-bit binary string
+        bits = format(idx, '05b')
+        # The n-th qubit is at position n-1
+        if bits[n-1] == '0':
+            prob_0 += np.abs(amp) ** 2
+        else:
+            prob_1 += np.abs(amp) ** 2
+
+    # Normalise probabilities
+    total = prob_0 + prob_1
+    if total > 0:
+        prob_0 /= total
+        prob_1 /= total
+
+    outcome = np.random.choice([0, 1], p=[prob_0, prob_1])
+    return outcome
+
+if __name__ == "__main__":
+    main()
+

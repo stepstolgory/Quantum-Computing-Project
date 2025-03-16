@@ -8,7 +8,7 @@ from quantum_computing_project.constants import *
 
 class Simulator:
     """
-    The Simulator class is where Deutsch-Jozsa, Grover's etc. will be implemented.
+    The Simulator class is where Deutsch-Jozsa, Grover's and error correction are implemented.
     """
 
     def __init__(self, registers):

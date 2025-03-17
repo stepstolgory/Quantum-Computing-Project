@@ -63,7 +63,6 @@ def main():
     Simulator.error_correction(error_type='phase flip', num_qubit=1)  # -- expect (1,0)
     Simulator.error_correction(error_type='phase flip', num_qubit=2)  # -- expect (1,1)
     Simulator.error_correction(error_type='phase flip', num_qubit=3)  # -- expect (0,1)
-
 def measure_register_n(state, n):
     """
     Measures the n-th qubit in a 5-qubit state.

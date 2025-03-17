@@ -12,7 +12,7 @@ from scipy.sparse import coo_matrix
 
 class Simulator:
     """
-    The Simulator class is where Deutsch-Jozsa, Grover's and error correction are implemented.
+    The Simulator class is where Deutsch-Jozsa, Grover's and error correction are implemented
     """
 
     def __init__(self, registers):

@@ -5,6 +5,10 @@ from quantum_computing_project.register import Register
 from quantum_computing_project.gate import Gate
 from quantum_computing_project.operations import Operations
 from quantum_computing_project.constants import *
+import matplotlib.pyplot as plt
+import math
+import random
+from scipy.sparse import coo_matrix
 
 class Simulator:
     """
@@ -14,69 +18,6 @@ class Simulator:
     def __init__(self, registers):
         self.registers = registers
 
-    @staticmethod
-    def grover_simplified(func, search_object):
-
-        """
-        - The number of inputs (qubits) into the register is ln(N)/ln(2)
-        - Number of iterations is (pi/4)*sqrt(N)
-        - Performs the initial step of Grover's algorithm, applying Hadamard Gate n times to n qubits to create a superposition state
-        """
-
-        N = len(func)
-        n_inputs = int(np.log(N) / np.log(2))
-        k = (np.pi / 4) * np.sqrt(N)
-        print("Initialising first step of Grover!!!")
-        grover_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
-        grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
-
-        # TODO: Need to add oracle step
-        # ***Can't just do I - 2|s⟩⟨s| since that is not reflective of quantum computing processes, must apply gates to achieve the same effect
-        # Identify target state from all other states superimposed within the register
-        # Flip all 0s in the target state by applying X gates to them (not sure how)
-        # Apply Hadamard on last qubit of (altered) target state
-        # Apply multi-controlled X on state, control bits are all the other bits except for the final one
-        # Flip the originally flipped 0s back by applying X gates to the same set of qubits
-
-        # loop is currently for searching only one object to save time
-        # TODO: Add multiple search functionality
-        desired_state = None
-        for i in range(0, len(func)):
-            if func[i] == search_object:
-                desired_state = i
-                break
-
-        if not desired_state:
-            raise ValueError("The desired value does not exist in the data")
-
-        # Generate a matrix (gate) which will flip the amplitude of the desired state
-        flip_data = np.ones(2 ** n_inputs)
-        flip_data[desired_state] = -1
-        flip_operator = Gate(flip_data, np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
-                             np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int), True)
-
-        # the R0 gate is a negative 2^n identity matrix with the top left element as positive 1
-        R0_data = -np.ones(2 ** grover_state.n_qubits)
-        R0_data[0] = 1
-        R0 = Gate(R0_data, np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int),
-                  np.linspace(0, (2 ** n_inputs) - 1, 2 ** n_inputs, dtype=int), True)
-
-        # TODO: Need to implement R0 as actual quantum gates, not a custom made matrix
-        # Diffuser step, the inversion operator R0 has to be defined as a separate gate with dimensions depending on the register size
-        # Apply gates as follows: Hadamard (n times) --> R0 --> Hadamard (n times)
-        # ***Can't just do 2|u⟩⟨u| - I for R0 since that is not reflective of quantum computing processes, must apply gates to achieve the same effect
-
-        e = 0
-        while e <= k:
-            grover_state.apply_gates(np.array([flip_operator]))
-            grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
-            grover_state.apply_gates(np.array([R0]))
-            grover_state.apply_gates(np.array([H]).repeat(grover_state.n_qubits))
-            e += 1
-
-        # plt.plots(func, grover_state.distribution())
-
-        return grover_state.distribution()
 
     @staticmethod
     def deutsch_jozsa(func, n_inputs):
@@ -226,4 +167,139 @@ class Simulator:
         return outcome
 
 
+
+
+    @staticmethod
+    def grover_calculate(unordered_list, search_object, t):
+        """Inputs:
+        unordered list : list of unordered values to search that has already been filtered by grover_initialise
+        search_object : list of values to search for
+        t: predetermined number of Grover iterations to apply"""
+
+        L = len(unordered_list)
+        n_inputs = int(np.ceil(np.log2(L)))
+        extended_length = 2 ** n_inputs
+
+        # If necessary, pad list with dummy values (here None) so that the Hilbert space is 2^n_inputs.
+        if L < extended_length:
+            padded_func = unordered_list + [None] * (extended_length - L)
+        else:
+            padded_func = unordered_list
+
+        # Initialize the register in state |0...0⟩ and then apply Hadamard gates.
+        initial_state = Register(n_inputs, [ZERO for _ in range(n_inputs)])
+        initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+        # Identify indices in the padded function that are in the search_object.
+        desired_states = []
+        for i in range(len(padded_func)):
+            if padded_func[i] in search_object:
+                desired_states.append(i)
+
+        # Check for desired values missing from the original function (not the padded version)
+        missing_values = [val for val in search_object if val not in unordered_list]
+        if missing_values:
+            raise ValueError(f"The following desired values do not exist in the data: {missing_values}")
+
+        if not desired_states:
+            raise ValueError("The desired values do not exist in the data")
+
+
+
+        # Create the flip operator (oracle).
+        flip_data = np.ones(extended_length)
+        for state in desired_states:
+            flip_data[state] = -1
+
+        indices = np.linspace(0, extended_length - 1, extended_length, dtype=int)
+        flip_operator = Gate(flip_data, indices, indices, True)
+
+        # Create the reflection about zero operator (R0)
+        R0_data = -np.ones(extended_length)
+        R0_data[0] = 1
+        R0 = Gate(R0_data, indices, indices, True)
+
+        # Perform Grover iterations.
+        for _ in range(int(t)):
+            initial_state.apply_gates(np.array([flip_operator]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+            initial_state.apply_gates(np.array([R0]))
+            initial_state.apply_gates(np.array([H]).repeat(initial_state.n_qubits))
+
+
+
+        # truncating the register to only include the original input states.
+        mask = initial_state.reg.row < L
+        new_data = initial_state.reg.data[mask]
+        new_row = initial_state.reg.row[mask]
+        new_col = initial_state.reg.col[mask]
+        initial_state.reg = coo_matrix((new_data, (new_row, new_col)), shape=(L, 1))
+
+        # Normalise the probabilities before getting a measurement and distribution
+        reg_sq = initial_state.reg.power(2)
+        norm = np.sqrt(reg_sq.sum())
+        initial_state.reg = initial_state.reg/norm
+
+        measurement = initial_state.measure()
+        final_distribution = initial_state.distribution()
+
+        """
+        # Get the full probability distribution from the extended Hilbert space.
+        full_distribution = initial_state.distribution()
+        # Truncate the distribution to only include the original input states.
+        final_distribution = full_distribution[:L]
+
+        # Optionally re-normalize to account for the truncation.
+        norm = np.sum(final_distribution)
+        if norm > 0:
+            final_distribution = final_distribution / norm
+        """
+        return final_distribution, measurement
+
+    @staticmethod
+    def grover_initialise(unordered_list, search_vals, known_n_sols):
+
+        """ Inputs:
+        unordered_list : list of unordered values to search
+        search_vals : list of values to search for
+        unique (not used): boolean, if true, only unique values are searched for, if false, duplicate values are also searched for
+        known_n_sols: boolean, if true, the number of solutions is known, if false, the number of solutions is unknown"""
+        # Determine the original input length and compute the required number of qubits.
+
+        search_vals = list(set(search_vals))
+
+        L = len(unordered_list)
+        n_inputs = int(np.ceil(np.log2(L)))
+        extended_length = 2 ** n_inputs
+        #
+        if known_n_sols:
+            n_sols = len(set(search_vals))
+            theta = np.arcsin(np.sqrt(n_sols / extended_length))
+            t = np.floor(np.pi / (4 * theta))
+            # return Simulator.grover_calculate(unordered_list, search_vals, t)[0], unordered_list
+            return Simulator.grover_calculate(unordered_list, search_vals, t)
+        else:
+            found_solution = False
+            T = 1
+            max_T = np.ceil(np.sqrt(extended_length))
+            while not found_solution and T <= max_T:
+                t = np.random.randint(1,T+1)
+                final_distribution, measured_state = Simulator.grover_calculate(unordered_list, search_vals, t)
+
+                # Print states matched and unmatched
+                if unordered_list[measured_state] in search_vals:
+                    # return final_distribution, unordered_list
+                    found_solution = True
+                    return Simulator.grover_calculate(unordered_list, search_vals, t)
+
+                T = np.ceil(T*1.2)
+            if not found_solution:
+                print("No solutions found")
+                return None
+
+
+    @staticmethod
+    def classical_search(input_list, targets):
+        ind = np.where(np.isin(input_list, targets))[0]
+        return ind
 

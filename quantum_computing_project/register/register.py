@@ -103,9 +103,9 @@ class Register:
         Returns:
             int: The measured state index.
         """
-        self.reg = self.reg.power(2)
-        sample = [i for i in range(self.reg.shape[0])]
-        probabilities = [p[0] for p in self.reg.toarray()]
+        probs = self.reg.power(2)
+        sample = [i for i in range(probs.shape[0])]
+        probabilities = [p[0] for p in probs.toarray()]
         return np.random.choice(sample, p=probabilities)
 
     def distribution(self):
@@ -118,9 +118,9 @@ class Register:
         Returns:
             int: The measured state index.
         """
-        self.reg = self.reg.power(2)
-        sample = [i for i in range(self.reg.shape[0])]
-        probabilities = [p[0] for p in self.reg.toarray()]
+        probs = self.reg.power(2)
+        sample = [i for i in range(probs.shape[0])]
+        probabilities = [p[0] for p in probs.toarray()]
         return probabilities
 
     @property

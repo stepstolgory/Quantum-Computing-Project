@@ -12,7 +12,7 @@ from scipy.sparse import coo_matrix
 
 class Simulator:
     """
-    The Simulator class is where Deutsch-Jozsa, Grover's and error correction are implemented
+    The Simulator class is where Deutsch-Jozsa, Grover's and error correction are implemented.
     """
 
     def __init__(self, registers):
@@ -165,9 +165,6 @@ class Simulator:
 
         outcome = np.random.choice([0, 1], p=[prob_0, prob_1])
         return outcome
-
-
-
 
     @staticmethod
     def grover_calculate(unordered_list, search_object, t):

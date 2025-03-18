@@ -63,38 +63,10 @@ def main():
     Simulator.error_correction(error_type='phase flip', num_qubit=1)  # -- expect (1,0)
     Simulator.error_correction(error_type='phase flip', num_qubit=2)  # -- expect (1,1)
     Simulator.error_correction(error_type='phase flip', num_qubit=3)  # -- expect (0,1)
-def measure_register_n(state, n):
-    """
-    Measures the n-th qubit in a 5-qubit state.
-
-    The function computes the total probability for the fourth qubit being 0 or 1.
-    It then returns the measurement outcome (0 or 1).
-    """
-    prob_0 = 0.0
-    prob_1 = 0.0
-
-    # Iterate over the nonzero elements in the state vector
-    for idx, amp in zip(state.row, state.data):
-        # Convert the index to a 5-bit binary string
-        bits = format(idx, '05b')
-        # The n-th qubit is at position n-1
-        if bits[n-1] == '0':
-            prob_0 += np.abs(amp) ** 2
-        else:
-            prob_1 += np.abs(amp) ** 2
-
-    # Normalise probabilities
-    total = prob_0 + prob_1
-    if total > 0:
-        prob_0 /= total
-        prob_1 /= total
-
-    outcome = np.random.choice([0, 1], p=[prob_0, prob_1])
-    return outcome
 
 def sinusoidal_function():
+    """Optional function to plot the sinusoidal function for range of t."""
 
-    """Optional function to plot the sinusoidal function for range of t"""
     input = [14,7,3,1,9,8,13,5,12,2,11,4,10,6]
     search_variables = [12,3,11]
     N = len(input)
